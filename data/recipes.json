@@ -1,0 +1,62 @@
+{
+  "meta": {
+    "title": "원소 연금술 조합 디펜스 - 합성 트리",
+    "version": "0.1.0",
+    "combineRules": {
+      "tier2": "tier1 x2",
+      "tier3": "tier2 x2  (또는 tier2 + tier1)",
+      "tier4": "tier3 x2 + tier2 x1",
+      "tier5": "tier4 x2 + tier3 x1 + tier2 x1"
+    },
+    "note": "elements는 1단계 기본 유닛. recipes는 2~5단계 합성식. inputs 배열은 순서 무관, 다중 동일 재료 허용."
+  },
+
+  "elements": [
+    { "id": "water",   "name": "물",   "tier": 1 },
+    { "id": "fire",    "name": "불",   "tier": 1 },
+    { "id": "wind",    "name": "바람", "tier": 1 },
+    { "id": "earth",   "name": "흙",   "tier": 1 },
+    { "id": "electric","name": "전기", "tier": 1 },
+    { "id": "wood",    "name": "나무", "tier": 1 },
+    { "id": "ice",     "name": "얼음", "tier": 1 },
+    { "id": "metal",   "name": "금속", "tier": 1 }
+  ],
+
+  "recipes": [
+    { "id": "steam",      "name": "증기",   "tier": 2, "inputs": ["water", "fire"] },
+    { "id": "mud",        "name": "진흙",   "tier": 2, "inputs": ["water", "earth"] },
+    { "id": "lava",       "name": "용암",   "tier": 2, "inputs": ["fire", "earth"] },
+    { "id": "molten",     "name": "쇳물",   "tier": 2, "inputs": ["fire", "metal"] },
+    { "id": "fog",        "name": "안개",   "tier": 2, "inputs": ["wind", "water"] },
+    { "id": "static",     "name": "정전기", "tier": 2, "inputs": ["wind", "electric"] },
+    { "id": "magnet",     "name": "자석",   "tier": 2, "inputs": ["electric", "metal"] },
+    { "id": "sprout",     "name": "새싹",   "tier": 2, "inputs": ["earth", "wood"] },
+    { "id": "sap",        "name": "수액",   "tier": 2, "inputs": ["water", "wood"] },
+    { "id": "frost",      "name": "서리",   "tier": 2, "inputs": ["ice", "wind"] },
+    { "id": "coldiron",   "name": "한철",   "tier": 2, "inputs": ["ice", "metal"] },
+    { "id": "charcoal",   "name": "숯",     "tier": 2, "inputs": ["wood", "fire"] },
+
+    { "id": "cloud",      "name": "구름",   "tier": 3, "inputs": ["steam", "wind"] },
+    { "id": "snow",       "name": "눈",     "tier": 3, "inputs": ["cloud", "ice"] },
+    { "id": "lightning",  "name": "번개",   "tier": 3, "inputs": ["static", "cloud"] },
+    { "id": "hail",       "name": "우박",   "tier": 3, "inputs": ["fog", "frost"] },
+    { "id": "magma",      "name": "마그마", "tier": 3, "inputs": ["lava", "molten"] },
+    { "id": "forest",     "name": "숲",     "tier": 3, "inputs": ["sprout", "sap"] },
+    { "id": "magfield",   "name": "자기장", "tier": 3, "inputs": ["magnet", "static"] },
+    { "id": "peat",       "name": "토탄",   "tier": 3, "inputs": ["mud", "charcoal"] },
+
+    { "id": "storm",      "name": "폭풍",     "tier": 4, "inputs": ["lightning", "cloud", "fog"] },
+    { "id": "blizzard",   "name": "눈보라",   "tier": 4, "inputs": ["lightning", "snow", "frost"] },
+    { "id": "eruption",   "name": "화산폭발", "tier": 4, "inputs": ["magma", "lightning", "lava"] },
+    { "id": "aurora",     "name": "오로라",   "tier": 4, "inputs": ["magfield", "lightning", "static"] },
+    { "id": "jungle",     "name": "정글",     "tier": 4, "inputs": ["forest", "peat", "sap"] },
+    { "id": "iceage",     "name": "빙하기",   "tier": 4, "inputs": ["snow", "hail", "coldiron"] },
+
+    { "id": "planet",     "name": "행성",     "tier": 5, "inputs": ["eruption", "aurora", "magfield", "mud"] },
+    { "id": "star",       "name": "항성",     "tier": 5, "inputs": ["eruption", "storm", "magma", "molten"] },
+    { "id": "gasgiant",   "name": "가스행성", "tier": 5, "inputs": ["iceage", "storm", "cloud", "fog"] },
+    { "id": "lifeplanet", "name": "생명행성", "tier": 5, "inputs": ["jungle", "iceage", "forest", "sap"] },
+    { "id": "starsystem", "name": "항성계",   "tier": 5, "inputs": ["eruption", "aurora", "magfield", "magnet"] },
+    { "id": "galaxy",     "name": "은하",     "tier": 5, "inputs": ["storm", "aurora", "magfield", "magnet"] }
+  ]
+}
