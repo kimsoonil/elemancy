@@ -243,7 +243,7 @@ test('baseHP — 구간 경계값이 스펙과 정확히 일치', () => {
   assert.equal(B.baseHP(21), 21000);
   assert.equal(B.baseHP(30), 111000);
   assert.equal(B.baseHP(31), 211000);
-  assert.equal(B.baseHP(40), 1110000);
+  assert.equal(B.baseHP(40), 1111000);
 });
 
 test('enemyHP — 역할 배수 적용', () => {
@@ -256,7 +256,7 @@ test('enemyHP — 보스는 구간 끝 base × 3', () => {
   assert.equal(B.enemyHP('boss', 10), 3000);
   assert.equal(B.enemyHP('boss', 20), 33000);
   assert.equal(B.enemyHP('boss', 30), 333000);
-  assert.equal(B.enemyHP('boss', 40), 3330000);
+  assert.equal(B.enemyHP('boss', 40), 3333000);
 });
 
 test('damageBand — 티어마다 ×10, 고밴드 원소만 상위', () => {
