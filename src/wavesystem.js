@@ -38,28 +38,24 @@ class WaveSystem {
     const seg = this.segmentOf(wave);
     const pool = this.bySegment.get(seg.id) || [];
 
-    if (this.isBossWave(wave)) {
-      const boss = pool.find(e => e.role === "boss");
-      return {
-        wave,
-        segment: seg.name,
-        type: "boss",
-        reqTier: seg.reqTier,
-        spawns: boss ? [{ id: boss.id, name: boss.name, role: boss.role, count: 1 }] : [],
-      };
-    }
-
-    // 일반 웨이브: 보스 제외, 역할이 겹치지 않게 2~3종을 뽑아 섞는다.
-    const normals = pool.filter(e => e.role !== "boss");
+    // 일반 적 구성 (보스 웨이브에서도 동일하게 깔고, 보스를 얹는다)
+    const normals = pool.filter((e) => e.role !== "boss");
     const picked = this._pickMixed(normals, wave);
-    // 웨이브가 구간 내에서 진행될수록 물량을 소폭 증가
     const progress = ((wave - 1) % 10) / 9; // 0 ~ 1
-    const spawns = picked.map(e => ({
+    const spawns = picked.map((e) => ({
       id: e.id,
       name: e.name,
       role: e.role,
       count: Math.max(1, Math.round(e.count * (0.7 + 0.6 * progress))),
     }));
+
+    if (this.isBossWave(wave)) {
+      const boss = pool.find((e) => e.role === "boss");
+      if (boss) {
+        spawns.push({ id: boss.id, name: boss.name, role: boss.role, count: 1 });
+      }
+      return { wave, segment: seg.name, type: "boss", reqTier: seg.reqTier, spawns };
+    }
 
     return { wave, segment: seg.name, type: "normal", reqTier: seg.reqTier, spawns };
   }
