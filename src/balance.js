@@ -32,3 +32,4 @@ function gambleResult(bet, rand) {
 
 const balance = { baseHP, enemyHP, damageBand, gambleResult };
 if (typeof module !== 'undefined' && module.exports) module.exports = balance;
+if (typeof window !== 'undefined') window.balance = balance;

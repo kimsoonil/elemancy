@@ -105,3 +105,4 @@ function tick(state, dt, now, onKill) {
 
 const combat = { dist, selectTargets, buffMultipliers, resolveHit, effectiveSpeed, pathLength, pathPointAt, tick };
 if (typeof module !== 'undefined' && module.exports) module.exports = combat;
+if (typeof window !== 'undefined') window.combat = combat;

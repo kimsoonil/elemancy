@@ -39,3 +39,4 @@ function rollDamage(band, rand) {
 
 const stats = { dominantElement, deriveStats, rollDamage };
 if (typeof module !== 'undefined' && module.exports) module.exports = stats;
+if (typeof window !== 'undefined') window.stats = stats;
