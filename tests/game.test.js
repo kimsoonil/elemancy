@@ -217,3 +217,38 @@ test('drawRandomUnit — 골드 부족이면 null', () => {
   g.gold = 10;
   assert.equal(g.drawRandomUnit(), null);
 });
+
+test('autoPlace — 빈 슬롯에 차례로 배치', () => {
+  const g = newGame(seqRng([0]));
+  g.bench = {}; g.towers = []; g.slots = [{ x: 2, y: 2 }, { x: 3, y: 2 }];
+  const a = g.autoPlace('water');
+  assert.equal(g.towers.length, 1); assert.deepEqual([a.x, a.y], [2, 2]);
+  const b = g.autoPlace('fire');
+  assert.deepEqual([b.x, b.y], [3, 2]); // 다음 빈 슬롯
+});
+
+test('autoPlace — 슬롯이 꽉 차면 벤치로 폴백(null)', () => {
+  const g = newGame(seqRng([0]));
+  g.bench = {}; g.towers = []; g.slots = [{ x: 2, y: 2 }];
+  g.autoPlace('water');
+  assert.equal(g.autoPlace('fire'), null);
+  assert.equal(g.bench.fire, 1);
+});
+
+test('moveTower — 빈 칸으로 이동, 점유 칸은 거부', () => {
+  const g = newGame(seqRng([0]));
+  g.bench = {}; g.towers = []; g.slots = [{ x: 2, y: 2 }, { x: 3, y: 2 }];
+  const a = g.autoPlace('water');
+  const b = g.autoPlace('fire');
+  assert.equal(g.moveTower(a.uid, { x: 5, y: 5 }), true);
+  assert.deepEqual([a.x, a.y], [5, 5]);
+  assert.equal(g.moveTower(a.uid, { x: 3, y: 2 }), false); // fire가 점유
+});
+
+test('drawRandomUnit — 슬롯 있으면 보드에 자동 배치', () => {
+  const g = newGame(seqRng([0]));
+  g.bench = {}; g.towers = []; g.gold = 1000; g.slots = [{ x: 2, y: 2 }];
+  const id = g.drawRandomUnit();
+  assert.equal(g.towers.length, 1);
+  assert.equal(g.towers[0].unitId, id);
+});

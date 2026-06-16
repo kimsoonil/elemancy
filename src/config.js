@@ -36,7 +36,7 @@ var CONFIG = {
   UPGRADE_PER_LEVEL: 0.01, // 레벨당 +1%
   UPGRADE_MAX_LEVEL: 1000,
   UPGRADE_COST: (tier, level) => Math.ceil(tier * 20 * Math.pow(1.01, level)),
-  RANDOM_DRAW_COST: 300, // 랜덤 유닛(tier1 원소) 1개 확정 뽑기 비용
+  RANDOM_DRAW_COST: 100, // 랜덤 유닛(tier1 원소) 1개 확정 뽑기 비용
   GAMBLE_BETS: [100, 500, 1000],
   GACHA: {
     1: { cost: 1000, rate: 0.5 },

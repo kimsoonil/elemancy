@@ -4,10 +4,13 @@ var balance = (typeof require !== 'undefined') ? require('./balance.js') : globa
 var Combat = (typeof require !== 'undefined') ? require('./combat.js') : globalThis.combat;
 
 class Game {
-  constructor({ alchemy, waveSystem, rng = Math.random }) {
+  constructor({ alchemy, waveSystem, rng = Math.random, slots = [] }) {
     this.alchemy = alchemy;
     this.waveSystem = waveSystem;
     this.rng = rng;
+    this.slots = slots;         // 자동 배치 가능한 빌드 칸 [{x,y}, ...]
+    this.selectedUid = null;    // 클릭 선택된 타워
+    this.moveMode = false;      // 이동 모드
     this.gold = 0;
     this.wave = 0;
     this.phase = 'prep';        // 'prep' | 'combat'
@@ -35,22 +38,18 @@ class Game {
     return out;
   }
 
-  /** rng로 tier1 원소를 n개 벤치에 추가 */
+  /** rng로 tier1 원소를 n개 받아 자동 배치(슬롯 없으면 벤치). */
   grantRandomElements(n) {
     for (let i = 0; i < n; i++) {
       const idx = Math.floor(this.rng() * this._tier1.length);
-      const id = this._tier1[idx];
-      this.bench[id] = (this.bench[id] || 0) + 1;
+      this.autoPlace(this._tier1[idx]);
     }
   }
 
   nextUid() { return `u${this._uid++}`; }
 
-  /** 벤치의 unitId 1개를 보드 위치 pos에 타워로 배치. 없으면 null. */
-  place(unitId, pos) {
-    if (!this.bench[unitId]) return null;
-    this.bench[unitId] -= 1;
-    if (this.bench[unitId] <= 0) delete this.bench[unitId];
+  /** unitId로 타워 인스턴스 생성(능력치 부여) 후 보드에 추가. */
+  _makeTower(unitId, pos) {
     const s = Stats.deriveStats(this.alchemy, unitId);
     const tower = {
       uid: this.nextUid(),
@@ -65,6 +64,39 @@ class Game {
     };
     this.towers.push(tower);
     return tower;
+  }
+
+  /** 비어있는 첫 빌드 슬롯 반환(타워 미점유). 없으면 null. */
+  freeSlot() {
+    const occupied = new Set(this.towers.map((t) => `${t.x},${t.y}`));
+    return this.slots.find((s) => !occupied.has(`${s.x},${s.y}`)) || null;
+  }
+
+  /** 빈 슬롯에 자동 배치. 슬롯이 꽉 차면 벤치에 보관하고 null 반환. */
+  autoPlace(unitId) {
+    const slot = this.freeSlot();
+    if (!slot) {
+      this.bench[unitId] = (this.bench[unitId] || 0) + 1;
+      return null;
+    }
+    return this._makeTower(unitId, slot);
+  }
+
+  /** 벤치의 unitId 1개를 보드 위치 pos에 배치. 없으면 null. */
+  place(unitId, pos) {
+    if (!this.bench[unitId]) return null;
+    this.bench[unitId] -= 1;
+    if (this.bench[unitId] <= 0) delete this.bench[unitId];
+    return this._makeTower(unitId, pos);
+  }
+
+  /** 배치 타워를 빈 칸 pos로 이동. 대상 칸이 점유돼 있으면 false. */
+  moveTower(uid, pos) {
+    const t = this.towers.find((x) => x.uid === uid);
+    if (!t) return false;
+    if (this.towers.some((o) => o !== t && o.x === pos.x && o.y === pos.y)) return false;
+    t.x = pos.x; t.y = pos.y;
+    return true;
   }
 
   /** 배치 타워를 회수해 벤치로 되돌림. */
@@ -98,11 +130,12 @@ class Game {
       }
       while (remaining > 0) {
         const idx = this.towers.findIndex((t) => t.unitId === id);
+        if (this.towers[idx] && this.towers[idx].uid === this.selectedUid) this.selectedUid = null;
         this.towers.splice(idx, 1);
         remaining -= 1;
       }
     }
-    this.bench[resultId] = (this.bench[resultId] || 0) + 1;
+    this.autoPlace(resultId); // 결과물 자동 배치
     return true;
   }
 
@@ -129,7 +162,7 @@ class Game {
     return net;
   }
 
-  /** 가챠: 티어별 비용·확률. 성공 시 해당 티어 유닛 랜덤 1개 벤치로. */
+  /** 가챠: 티어별 비용·확률. 성공 시 해당 티어 유닛 랜덤 1개 자동 배치. */
   gacha(tier) {
     const g = CONFIG.GACHA[tier];
     if (!g || this.gold < g.cost) return { success: false, reason: 'gold' };
@@ -137,26 +170,26 @@ class Game {
     if (this.rng() >= g.rate) return { success: false };
     const pool = this.alchemy.byTier(tier).map((u) => u.id);
     const id = pool[Math.floor(this.rng() * pool.length)];
-    this.bench[id] = (this.bench[id] || 0) + 1;
+    this.autoPlace(id);
     return { success: true, id };
   }
 
-  /** 랜덤 뽑기: 골드 차감 후 무작위 tier1 원소 1개를 확정 획득. 부족하면 null. */
+  /** 랜덤 뽑기: 골드 차감 후 무작위 tier1 원소 1개를 자동 배치. 부족하면 null. */
   drawRandomUnit() {
     if (this.gold < CONFIG.RANDOM_DRAW_COST) return null;
     this.gold -= CONFIG.RANDOM_DRAW_COST;
     const id = this._tier1[Math.floor(this.rng() * this._tier1.length)];
-    this.bench[id] = (this.bench[id] || 0) + 1;
+    this.autoPlace(id);
     return id;
   }
 
-  /** 보스 토큰 사용: 원하는 tier1 원소를 직접 획득. */
+  /** 보스 토큰 사용: 원하는 tier1 원소를 자동 배치. */
   redeemToken(elementId) {
     if (this.bossTokens <= 0) return false;
     const u = this.alchemy.get(elementId);
     if (!u || u.tier !== 1) return false;
     this.bossTokens -= 1;
-    this.bench[elementId] = (this.bench[elementId] || 0) + 1;
+    this.autoPlace(elementId);
     return true;
   }
 

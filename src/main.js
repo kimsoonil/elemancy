@@ -5,7 +5,11 @@ async function boot() {
   ]);
   const alchemy = new Alchemy(recipes);
   const waveSystem = new WaveSystem(enemies);
-  const game = new Game({ alchemy, waveSystem });
+
+  // 빌드 가능한 안쪽 칸(자동 배치 슬롯): 경로 안쪽 7×7
+  const slots = [];
+  for (let x = 2; x <= 8; x++) for (let y = 2; y <= 8; y++) slots.push({ x, y });
+  const game = new Game({ alchemy, waveSystem, slots });
 
   // 정사각 순환 경로 (격자 단위)
   game.path = [{ x: 1, y: 1 }, { x: 9, y: 1 }, { x: 9, y: 9 }, { x: 1, y: 9 }];
@@ -18,7 +22,7 @@ async function boot() {
   const hud = document.getElementById('hud');
   const waveInfo = document.getElementById('waveInfo');
   const resourceInfo = document.getElementById('resourceInfo');
-  const combinePanel = document.getElementById('combinePanel');
+  const selectedPanel = document.getElementById('selectedPanel');
   const upgradePanel = document.getElementById('upgradePanel');
   const gamblePanel = document.getElementById('gamblePanel');
   const gachaPanel = document.getElementById('gachaPanel');
@@ -39,7 +43,7 @@ async function boot() {
     flash(id ? `랜덤 획득: ${alchemy.name(id)}` : '골드 부족', id ? 'good' : 'bad');
   };
 
-  // 보드 클릭 → 벤치 첫 원소 배치
+  // 보드 클릭 → 유닛 선택 / (이동 모드면) 이동
   canvas.onclick = (ev) => {
     const rect = canvas.getBoundingClientRect();
     // 캔버스가 CSS로 스케일되므로 내부 해상도 기준으로 환산
@@ -47,10 +51,17 @@ async function boot() {
     const sy = canvas.height / rect.height;
     const gx = Math.round((ev.clientX - rect.left) * sx / TILE);
     const gy = Math.round((ev.clientY - rect.top) * sy / TILE);
-    if (gx <= 1 || gx >= 9 || gy <= 1 || gy >= 9) return; // 안쪽만
-    const benchId = Object.keys(game.bench)[0];
-    if (benchId) game.place(benchId, { x: gx, y: gy });
+    const hit = game.towers.find((t) => Math.round(t.x) === gx && Math.round(t.y) === gy);
+    if (game.moveMode && game.selectedUid) {
+      const inside = gx > 1 && gx < 9 && gy > 1 && gy < 9;
+      if (inside && !hit) { game.moveTower(game.selectedUid, { x: gx, y: gy }); game.moveMode = false; }
+      return;
+    }
+    game.selectedUid = hit ? hit.uid : null;
+    game.moveMode = false;
   };
+
+  const ATK_LABEL = { aoe: '광역', single: '단일', slow: '둔화', buff: '버프' };
 
   // ── 골드 사용 컨트롤 (한 번만 생성, 라벨/활성은 매 프레임 갱신) ──
   const tier1 = alchemy.byTier(1).map((u) => u.id);
@@ -138,18 +149,46 @@ async function boot() {
     tokenPanel.appendChild(row);
   }
 
-  function renderCombine() {
-    combinePanel.innerHTML = '';
-    const craftable = game.alchemy.craftable(game.ownedCounts());
-    if (craftable.length === 0) {
-      combinePanel.innerHTML = '<span class="muted">조합할 재료가 부족합니다</span>';
+  function renderSelected() {
+    selectedPanel.innerHTML = '';
+    const sel = game.towers.find((t) => t.uid === game.selectedUid);
+    if (!sel) {
+      selectedPanel.innerHTML = '<span class="muted">보드의 유닛을 클릭하면 이동·조합할 수 있어요</span>';
       return;
     }
-    for (const id of craftable) {
-      const btn = document.createElement('button');
-      btn.textContent = `${game.alchemy.name(id)} 조합`;
-      btn.onclick = () => game.combine(id);
-      combinePanel.appendChild(btn);
+    const info = document.createElement('div');
+    info.className = 'hud-row';
+    info.innerHTML = `<b>${alchemy.name(sel.unitId)}</b><span class="muted">T${sel.tier} · ${ATK_LABEL[sel.atkType] || ''}</span>`;
+    selectedPanel.appendChild(info);
+
+    const actions = document.createElement('div');
+    actions.className = 'btn-row';
+    const moveBtn = document.createElement('button');
+    moveBtn.className = 'mini';
+    moveBtn.textContent = game.moveMode ? '🔀 이동할 칸 클릭…' : '🔀 이동';
+    moveBtn.onclick = () => { game.moveMode = !game.moveMode; };
+    actions.appendChild(moveBtn);
+    selectedPanel.appendChild(actions);
+
+    // 이 유닛이 재료로 들어가는, 지금 만들 수 있는 조합
+    const craftable = new Set(game.alchemy.craftable(game.ownedCounts()));
+    const uses = game.alchemy.usages(sel.unitId).filter((id) => craftable.has(id));
+    if (uses.length) {
+      const row = document.createElement('div');
+      row.className = 'btn-row';
+      for (const id of uses) {
+        const b = document.createElement('button');
+        b.className = 'mini';
+        b.textContent = `${alchemy.name(id)} 조합`;
+        b.onclick = () => { if (game.combine(id)) flash(`조합 완성: ${alchemy.name(id)}`, 'good'); };
+        row.appendChild(b);
+      }
+      selectedPanel.appendChild(row);
+    } else {
+      const m = document.createElement('div');
+      m.className = 'muted'; m.style.marginTop = '6px';
+      m.textContent = '이 유닛으로 지금 만들 수 있는 조합이 없어요';
+      selectedPanel.appendChild(m);
     }
   }
 
@@ -164,7 +203,7 @@ async function boot() {
     hud.innerHTML = renderHud(game);
     updateEconomy();
     renderTokens();
-    renderCombine();
+    renderSelected();
     requestAnimationFrame(loop);
   }
   requestAnimationFrame(loop);

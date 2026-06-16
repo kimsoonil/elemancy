@@ -87,6 +87,13 @@ function drawGame(ctx, game) {
     ctx.strokeStyle = t.tier >= 4 ? '#ffe680' : 'rgba(255,255,255,0.7)';
     ctx.lineWidth = t.tier >= 4 ? 2.5 : 1.5;
     ctx.beginPath(); ctx.arc(cx, cy, 16, 0, Math.PI * 2); ctx.stroke();
+    // 선택 표시
+    if (t.uid === game.selectedUid) {
+      ctx.strokeStyle = '#fff'; ctx.lineWidth = 3;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath(); ctx.arc(cx, cy, 21, 0, Math.PI * 2); ctx.stroke();
+      ctx.setLineDash([]);
+    }
     // 아이콘 + 티어
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.font = '13px sans-serif';
@@ -137,12 +144,23 @@ function renderHud(game) {
   const pct = Math.min(100, Math.round((w / CONFIG.GAME_OVER_CAP) * 100));
   const barColor = w > CONFIG.DANGER_THRESHOLD ? '#ff4d4d' : w > CONFIG.GAME_OVER_CAP * 0.5 ? '#ffd23c' : '#54e08a';
 
-  const chips = Object.entries(game.bench).map(([id, n]) => {
+  // 배치된 유닛(타워)을 종류별로 집계
+  const placed = new Map();
+  for (const t of game.towers) {
+    if (!placed.has(t.unitId)) placed.set(t.unitId, { count: 0, atkType: t.atkType });
+    placed.get(t.unitId).count++;
+  }
+  // 슬롯이 꽉 차 벤치로 밀린 미배치 유닛도 합산
+  for (const [id, n] of Object.entries(game.bench)) {
+    if (!placed.has(id)) placed.set(id, { count: 0, atkType: null });
+    placed.get(id).count += n;
+  }
+  const chips = [...placed.entries()].map(([id, info]) => {
     const e = ELEM[id];
-    const col = e ? e.c : '#8a93b8';
-    const icon = e ? e.i : '◆';
-    return `<span class="chip" style="--c:${col}">${icon} ${game.alchemy.name(id)}<b>×${n}</b></span>`;
-  }).join('') || '<span class="muted">비어있음</span>';
+    const col = e ? e.c : (TYPE_COLOR[info.atkType] || '#8a93b8');
+    const icon = e ? e.i : (TYPE_ICON[info.atkType] || '◆');
+    return `<span class="chip" style="--c:${col}">${icon} ${game.alchemy.name(id)}<b>×${info.count}</b></span>`;
+  }).join('') || '<span class="muted">배치된 유닛 없음</span>';
 
   return `
     <div class="sec">
@@ -151,7 +169,7 @@ function renderHud(game) {
       <div class="bar"><div class="bar-fill" style="width:${pct}%;background:${barColor}"></div></div>
     </div>
     <div class="sec">
-      <h4>🎒 벤치</h4>
+      <h4>🎒 배치된 유닛</h4>
       <div class="chips">${chips}</div>
     </div>
     ${game.gameOver ? '<div class="banner over">💀 게임 오버</div>' : ''}
