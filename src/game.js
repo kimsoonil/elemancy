@@ -141,6 +141,15 @@ class Game {
     return { success: true, id };
   }
 
+  /** 랜덤 뽑기: 골드 차감 후 무작위 tier1 원소 1개를 확정 획득. 부족하면 null. */
+  drawRandomUnit() {
+    if (this.gold < CONFIG.RANDOM_DRAW_COST) return null;
+    this.gold -= CONFIG.RANDOM_DRAW_COST;
+    const id = this._tier1[Math.floor(this.rng() * this._tier1.length)];
+    this.bench[id] = (this.bench[id] || 0) + 1;
+    return id;
+  }
+
   /** 보스 토큰 사용: 원하는 tier1 원소를 직접 획득. */
   redeemToken(elementId) {
     if (this.bossTokens <= 0) return false;

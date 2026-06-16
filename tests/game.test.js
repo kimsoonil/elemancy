@@ -200,3 +200,20 @@ test('40웨이브 클리어 시 승리', () => {
   g.update(0.1);
   assert.equal(g.victory, true);
 });
+
+const CONFIG = require('../src/config.js');
+test('drawRandomUnit — 골드 차감 후 랜덤 tier1 1개 획득', () => {
+  const g = newGame(seqRng([0]));
+  g.bench = {}; g.towers = []; g.gold = 1000;
+  const id = g.drawRandomUnit();
+  assert.equal(id, 'water');               // rng=0 → 첫 tier1(water)
+  assert.equal(g.gold, 1000 - CONFIG.RANDOM_DRAW_COST);
+  assert.equal(g.ownedCounts().water, 1);
+  assert.equal(g.alchemy.get(id).tier, 1); // 항상 tier1
+});
+
+test('drawRandomUnit — 골드 부족이면 null', () => {
+  const g = newGame(seqRng([0]));
+  g.gold = 10;
+  assert.equal(g.drawRandomUnit(), null);
+});

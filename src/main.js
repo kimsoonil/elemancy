@@ -32,6 +32,13 @@ async function boot() {
 
   document.getElementById('nextWave').onclick = () => game.startWave();
 
+  // 랜덤 유닛 뽑기
+  const drawBtn = document.getElementById('drawBtn');
+  drawBtn.onclick = () => {
+    const id = game.drawRandomUnit();
+    flash(id ? `랜덤 획득: ${alchemy.name(id)}` : '골드 부족', id ? 'good' : 'bad');
+  };
+
   // 보드 클릭 → 벤치 첫 원소 배치
   canvas.onclick = (ev) => {
     const rect = canvas.getBoundingClientRect();
@@ -91,6 +98,9 @@ async function boot() {
   }
 
   function updateEconomy() {
+    // 랜덤 뽑기
+    drawBtn.innerHTML = `<span>랜덤 원소 1개</span><span class="cost">${CONFIG.RANDOM_DRAW_COST}G</span>`;
+    drawBtn.disabled = game.gold < CONFIG.RANDOM_DRAW_COST;
     // 업그레이드
     for (let i = 0; i < 5; i++) {
       const tier = i + 1, lvl = game.upgrades[tier];
