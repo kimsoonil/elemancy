@@ -1,5 +1,6 @@
 const CONFIG = (typeof require !== 'undefined') ? require('./config.js') : globalThis.CONFIG;
 const Stats = (typeof require !== 'undefined') ? require('./stats.js') : globalThis.stats;
+const balance = (typeof require !== 'undefined') ? require('./balance.js') : globalThis.balance;
 
 class Game {
   constructor({ alchemy, waveSystem, rng = Math.random }) {
@@ -96,6 +97,51 @@ class Game {
       }
     }
     this.bench[resultId] = (this.bench[resultId] || 0) + 1;
+    return true;
+  }
+
+  /** 티어 공격력 업그레이드(레벨+1). 골드 부족/최대레벨이면 false. */
+  upgrade(tier) {
+    if (this.upgrades[tier] >= CONFIG.UPGRADE_MAX_LEVEL) return false;
+    const cost = CONFIG.UPGRADE_COST(tier, this.upgrades[tier]);
+    if (this.gold < cost) return false;
+    this.gold -= cost;
+    this.upgrades[tier] += 1;
+    return true;
+  }
+
+  /** 티어의 현재 데미지 배수 (1 + 레벨×0.01). */
+  damageMultiplier(tier) {
+    return 1 + this.upgrades[tier] * CONFIG.UPGRADE_PER_LEVEL;
+  }
+
+  /** 도박: 베팅액만큼 보유해야 함. 순손익 −bet~+bet. */
+  gamble(bet) {
+    if (!CONFIG.GAMBLE_BETS.includes(bet) || this.gold < bet) return false;
+    const net = balance.gambleResult(bet, this.rng());
+    this.gold += net;
+    return net;
+  }
+
+  /** 가챠: 티어별 비용·확률. 성공 시 해당 티어 유닛 랜덤 1개 벤치로. */
+  gacha(tier) {
+    const g = CONFIG.GACHA[tier];
+    if (!g || this.gold < g.cost) return { success: false, reason: 'gold' };
+    this.gold -= g.cost;
+    if (this.rng() >= g.rate) return { success: false };
+    const pool = this.alchemy.byTier(tier).map((u) => u.id);
+    const id = pool[Math.floor(this.rng() * pool.length)];
+    this.bench[id] = (this.bench[id] || 0) + 1;
+    return { success: true, id };
+  }
+
+  /** 보스 토큰 사용: 원하는 tier1 원소를 직접 획득. */
+  redeemToken(elementId) {
+    if (this.bossTokens <= 0) return false;
+    const u = this.alchemy.get(elementId);
+    if (!u || u.tier !== 1) return false;
+    this.bossTokens -= 1;
+    this.bench[elementId] = (this.bench[elementId] || 0) + 1;
     return true;
   }
 }

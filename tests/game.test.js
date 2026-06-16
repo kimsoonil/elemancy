@@ -80,3 +80,70 @@ test('combine — 재료 부족이면 실패(false)', () => {
   g.bench = { water: 1 }; g.towers = [];
   assert.equal(g.combine('steam'), false);
 });
+
+test('upgrade — 골드 충분하면 레벨+1, 골드 차감', () => {
+  const g = newGame(seqRng([0]));
+  g.gold = 100;
+  const ok = g.upgrade(1); // tier1 첫 레벨 = 20
+  assert.equal(ok, true);
+  assert.equal(g.upgrades[1], 1);
+  assert.equal(g.gold, 80);
+});
+
+test('upgrade — 골드 부족이면 실패', () => {
+  const g = newGame(seqRng([0]));
+  g.gold = 5;
+  assert.equal(g.upgrade(1), false);
+  assert.equal(g.upgrades[1], 0);
+});
+
+test('damageMultiplier — 티어 레벨당 +1%', () => {
+  const g = newGame(seqRng([0]));
+  g.upgrades[2] = 50;
+  assert.ok(Math.abs(g.damageMultiplier(2) - 1.5) < 1e-9);
+});
+
+test('gamble — rng로 순손익 결정, 골드 반영', () => {
+  // gambleResult(1000, 0.5) = floor(0.5×2001) − 1000 = 0
+  const g = newGame(seqRng([0.5]));
+  g.gold = 1000;
+  const net = g.gamble(1000);
+  assert.equal(net, 0);
+  assert.equal(g.gold, 1000);
+});
+
+test('gamble — 베팅액보다 골드 적으면 실패', () => {
+  const g = newGame(seqRng([0]));
+  g.gold = 50;
+  assert.equal(g.gamble(100), false);
+});
+
+test('gacha — 성공 시 해당 티어 유닛 획득 + 골드 차감', () => {
+  const g = newGame(seqRng([0, 0]));
+  g.bench = {}; g.towers = [];
+  g.gold = 1000;
+  const res = g.gacha(1);
+  assert.equal(res.success, true);
+  assert.equal(g.gold, 0);
+  assert.equal(Object.values(g.ownedCounts()).reduce((s, n) => s + n, 0), 1);
+});
+
+test('gacha — 실패 시 골드만 소모', () => {
+  const g = newGame(seqRng([0.99]));
+  g.bench = {}; g.towers = [];
+  g.gold = 1000;
+  const res = g.gacha(1);
+  assert.equal(res.success, false);
+  assert.equal(g.gold, 0);
+  assert.equal(Object.values(g.ownedCounts()).reduce((s, n) => s + n, 0), 0);
+});
+
+test('redeemToken — 보스 토큰으로 원하는 tier1 원소 획득', () => {
+  const g = newGame(seqRng([0]));
+  g.bench = {}; g.towers = []; g.bossTokens = 2;
+  assert.equal(g.redeemToken('fire'), true);
+  assert.equal(g.bossTokens, 1);
+  assert.equal(g.ownedCounts().fire, 1);
+  g.bossTokens = 0;
+  assert.equal(g.redeemToken('fire'), false);
+});
