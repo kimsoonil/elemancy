@@ -26,6 +26,7 @@ var CONFIG = {
   BOSS_CAP_WEIGHT: 8,
   SPAWN_PER_ROUND: 20,
   GAME_OVER_CAP: 100,
+  DANGER_THRESHOLD: 80, // 위기 게이지 경고 표시 기준
   MAX_WAVE: 40,
 
   // 경제

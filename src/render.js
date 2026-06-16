@@ -31,7 +31,7 @@ function drawGame(ctx, game) {
 }
 
 function renderHud(game) {
-  const danger = game.boardWeight() > 80 ? 'danger' : '';
+  const danger = game.boardWeight() > CONFIG.DANGER_THRESHOLD ? 'danger' : '';
   return `
     <div>웨이브: <b>${game.wave}</b> / ${CONFIG.MAX_WAVE} (${game.phase})</div>
     <div>골드: <b>${Math.floor(game.gold)}</b></div>

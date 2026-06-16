@@ -104,3 +104,11 @@ test('tick — dmgScale로 업그레이드 배수 반영', () => {
   Combat.tick({ towers, enemies, path, dmgScale: () => 2 }, 1, 0, () => {});
   assert.equal(enemies[0].hp, 80); // 10 × 2배 = 20 데미지
 });
+
+test('tick — 경로 미주입(빈 배열)이면 NaN 없이 안전 종료', () => {
+  const Combat = require('../src/combat.js');
+  const enemies = [{ uid: 'e', role: 'swarm', hp: 100, maxHp: 100, baseSpeed: 1, pathPos: 0, x: 0, y: 0, slowUntil: 0 }];
+  Combat.tick({ towers: [], enemies, path: [] }, 1, 0, () => {});
+  assert.equal(Number.isNaN(enemies[0].pathPos), false);
+  assert.equal(enemies[0].pathPos, 0);
+});

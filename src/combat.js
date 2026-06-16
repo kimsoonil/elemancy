@@ -74,6 +74,7 @@ function pathPointAt(path, pos) {
  */
 function tick(state, dt, now, onKill) {
   const total = pathLength(state.path);
+  if (total === 0) return; // 경로 미주입 시 NaN 방지
   // 1) 이동 (무한 순환)
   for (const e of state.enemies) {
     e.pathPos = (e.pathPos + effectiveSpeed(e, now) * dt) % total;
