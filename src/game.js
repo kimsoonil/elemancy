@@ -38,6 +38,66 @@ class Game {
   }
 
   nextUid() { return `u${this._uid++}`; }
+
+  /** 벤치의 unitId 1개를 보드 위치 pos에 타워로 배치. 없으면 null. */
+  place(unitId, pos) {
+    if (!this.bench[unitId]) return null;
+    this.bench[unitId] -= 1;
+    if (this.bench[unitId] <= 0) delete this.bench[unitId];
+    const s = Stats.deriveStats(this.alchemy, unitId);
+    const tower = {
+      uid: this.nextUid(),
+      unitId,
+      tier: s.tier,
+      atkType: s.atkType,
+      damage: Stats.rollDamage(s.damageBand, this.rng()),
+      atkSpeed: s.atkSpeed,
+      range: s.range,
+      x: pos.x, y: pos.y,
+      cooldown: 0,
+    };
+    this.towers.push(tower);
+    return tower;
+  }
+
+  /** 배치 타워를 회수해 벤치로 되돌림. */
+  recall(uid) {
+    const idx = this.towers.findIndex((t) => t.uid === uid);
+    if (idx < 0) return false;
+    const t = this.towers[idx];
+    this.towers.splice(idx, 1);
+    this.bench[t.unitId] = (this.bench[t.unitId] || 0) + 1;
+    return true;
+  }
+
+  /** resultId 합성: 소유(벤치+보드)에서 재료 소모, 결과는 벤치로. */
+  combine(resultId) {
+    const unit = this.alchemy.get(resultId);
+    if (!unit || !unit.inputs) return false;
+    const need = {};
+    for (const id of unit.inputs) need[id] = (need[id] || 0) + 1;
+    const owned = this.ownedCounts();
+    for (const [id, cnt] of Object.entries(need)) {
+      if ((owned[id] || 0) < cnt) return false;
+    }
+    // 소모: 벤치 우선, 부족분은 보드 타워에서 제거
+    for (const [id, cnt] of Object.entries(need)) {
+      let remaining = cnt;
+      const fromBench = Math.min(remaining, this.bench[id] || 0);
+      if (fromBench > 0) {
+        this.bench[id] -= fromBench;
+        if (this.bench[id] <= 0) delete this.bench[id];
+        remaining -= fromBench;
+      }
+      while (remaining > 0) {
+        const idx = this.towers.findIndex((t) => t.unitId === id);
+        this.towers.splice(idx, 1);
+        remaining -= 1;
+      }
+    }
+    this.bench[resultId] = (this.bench[resultId] || 0) + 1;
+    return true;
+  }
 }
 
 if (typeof module !== 'undefined' && module.exports) module.exports = Game;

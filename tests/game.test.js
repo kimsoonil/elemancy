@@ -35,3 +35,48 @@ test('ownedCounts — 벤치 + 배치 타워 합산', () => {
   g.towers = [{ unitId: 'fire' }];
   assert.equal(g.ownedCounts().fire, 2);
 });
+
+test('place — 벤치 원소를 보드 슬롯에 배치(타워 생성, 능력치 부여)', () => {
+  const g = newGame(seqRng([0]));
+  g.bench = { water: 1 }; g.towers = [];
+  const t = g.place('water', { x: 3, y: 4 });
+  assert.equal(g.bench.water, undefined);
+  assert.equal(g.towers.length, 1);
+  assert.equal(t.unitId, 'water');
+  assert.equal(t.atkType, 'slow');
+  assert.ok(t.damage >= 10 && t.damage <= 15);
+  assert.equal(t.x, 3);
+});
+
+test('place — 보유하지 않은 유닛은 배치 불가(null)', () => {
+  const g = newGame(seqRng([0]));
+  g.bench = {}; g.towers = [];
+  assert.equal(g.place('fire', { x: 0, y: 0 }), null);
+});
+
+test('combine — 재료를 소유하면 합성 성공, 결과는 벤치로', () => {
+  const g = newGame(seqRng([0]));
+  g.bench = { water: 1, fire: 1 }; g.towers = [];
+  const ok = g.combine('steam');
+  assert.equal(ok, true);
+  const owned = g.ownedCounts();
+  assert.equal(owned.water, undefined);
+  assert.equal(owned.fire, undefined);
+  assert.equal(owned.steam, 1);
+});
+
+test('combine — 재료가 보드에 배치돼 있어도 소유 기준으로 합성', () => {
+  const g = newGame(seqRng([0]));
+  g.bench = { water: 1 };
+  g.towers = [{ uid: 'x', unitId: 'fire', atkType: 'aoe' }];
+  const ok = g.combine('steam');
+  assert.equal(ok, true);
+  assert.equal(g.towers.find((t) => t.unitId === 'fire'), undefined);
+  assert.equal(g.ownedCounts().steam, 1);
+});
+
+test('combine — 재료 부족이면 실패(false)', () => {
+  const g = newGame(seqRng([0]));
+  g.bench = { water: 1 }; g.towers = [];
+  assert.equal(g.combine('steam'), false);
+});
