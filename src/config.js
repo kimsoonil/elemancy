@@ -30,7 +30,8 @@ var CONFIG = {
   MAX_WAVE: 40,
 
   // 경제
-  START_ELEMENTS: 5,
+  START_GOLD: 600,       // 시작 골드 (랜덤 뽑기 100G로 시작 유닛 구성)
+  START_ELEMENTS: 0,     // 시작 무료 유닛 (골드로 뽑아 시작)
   WAVE_CLEAR_ELEMENTS: 2,
   BOSS_TOKEN_BASE: 1,     // 보스마다 ×3 (1,3,9,27)
   UPGRADE_PER_LEVEL: 0.01, // 레벨당 +1%

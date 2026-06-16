@@ -11,7 +11,7 @@ class Game {
     this.slots = slots;         // 자동 배치 가능한 빌드 칸 [{x,y}, ...]
     this.selectedUid = null;    // 클릭 선택된 타워
     this.moveMode = false;      // 이동 모드
-    this.gold = 0;
+    this.gold = CONFIG.START_GOLD;
     this.wave = 0;
     this.phase = 'prep';        // 'prep' | 'combat'
     this.bench = {};            // {unitId: count} 미배치 소유분

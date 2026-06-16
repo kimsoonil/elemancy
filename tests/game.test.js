@@ -5,21 +5,19 @@ const WaveSystem = require('../src/wavesystem.js');
 const recipes = require('../data/recipes.json');
 const enemies = require('../data/enemies.json');
 const Game = require('../src/game.js');
+const CONFIG = require('../src/config.js');
 
 const seqRng = (vals) => { let i = 0; return () => vals[i++ % vals.length]; };
 function newGame(rng = seqRng([0])) {
   return new Game({ alchemy: new Alchemy(recipes), waveSystem: new WaveSystem(enemies), rng });
 }
 
-test('시작 시 tier1 원소 5개 지급, 골드 0, 웨이브 0', () => {
+test('시작 시 무료 유닛 0, 시작 골드 600, 웨이브 0', () => {
   const g = newGame();
   const total = Object.values(g.ownedCounts()).reduce((s, n) => s + n, 0);
-  assert.equal(total, 5);
-  assert.equal(g.gold, 0);
+  assert.equal(total, CONFIG.START_ELEMENTS); // 0
+  assert.equal(g.gold, CONFIG.START_GOLD);    // 600
   assert.equal(g.wave, 0);
-  for (const id of Object.keys(g.ownedCounts())) {
-    assert.equal(g.alchemy.get(id).tier, 1);
-  }
 });
 
 test('grantRandomElements — rng로 tier1 결정적 선택', () => {
@@ -201,7 +199,6 @@ test('40웨이브 클리어 시 승리', () => {
   assert.equal(g.victory, true);
 });
 
-const CONFIG = require('../src/config.js');
 test('drawRandomUnit — 골드 차감 후 랜덤 tier1 1개 획득', () => {
   const g = newGame(seqRng([0]));
   g.bench = {}; g.towers = []; g.gold = 1000;
