@@ -126,10 +126,13 @@ function drawGame(ctx, game) {
   }
 }
 
-// 1번 카드: 현재 웨이브 표시 (다음 웨이브 버튼은 정적 HTML)
+// 1번 카드: 현재 웨이브 + 다음 웨이브까지 카운트다운
 function renderWaveInfo(game) {
-  const phaseLabel = game.phase === 'combat' ? '⚔️ 전투' : '🛠️ 준비';
-  return `<span class="wave-badge">웨이브 ${game.wave}<span class="slash">/${CONFIG.MAX_WAVE}</span></span><span class="phase">${phaseLabel}</span>`;
+  let label;
+  if (game.victory) label = '🌌 클리어';
+  else if (game.wave >= CONFIG.MAX_WAVE) label = '⚔️ 최종 웨이브';
+  else label = `⏱ ${Math.max(0, Math.ceil(game.roundTimer))}초 후 다음`;
+  return `<span class="wave-badge">웨이브 ${game.wave}<span class="slash">/${CONFIG.MAX_WAVE}</span></span><span class="phase">${label}</span>`;
 }
 
 // 4번 카드: 골드 + 원소 선택권

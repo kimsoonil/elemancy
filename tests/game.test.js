@@ -172,29 +172,49 @@ test('게임오버 — 보드 가중치 > 100', () => {
   assert.equal(g.gameOver, true);
 });
 
-test('웨이브 클리어 — 적 전멸 시 prep 복귀 + tier1 원소 2개 지급', () => {
+test('라운드 타이머 0 → 자동으로 다음 웨이브 시작 + 타이머 리셋', () => {
   const g = newGame(seqRng([0]));
-  g.bench = {}; g.towers = [];
-  g.phase = 'combat'; g.wave = 3; g.enemies = [];
-  g.update(0.1);
-  assert.equal(g.phase, 'prep');
-  assert.equal(Object.values(g.ownedCounts()).reduce((s, n) => s + n, 0), 2);
+  g.path = [{ x: 0, y: 0 }, { x: 10, y: 0 }, { x: 10, y: 10 }, { x: 0, y: 10 }];
+  assert.equal(g.wave, 0);
+  g.update(CONFIG.ROUND_TIME + 0.01); // 30초 경과
+  assert.equal(g.wave, 1);            // 자동 시작
+  assert.ok(g.spawnQueue.length > 0);
+  assert.ok(g.roundTimer > CONFIG.ROUND_TIME - 1); // 리셋됨
 });
 
-test('보스 웨이브 클리어 시 보스 토큰 ×3 지급', () => {
+test('startWave 수동 호출 시 타이머 리셋', () => {
   const g = newGame(seqRng([0]));
-  g.phase = 'combat'; g.enemies = [];
-  g.wave = 10; g._wasBoss = true;
-  g.update(0.1);
+  g.roundTimer = 3;
+  g.startWave();
+  assert.equal(g.wave, 1);
+  assert.equal(g.roundTimer, CONFIG.ROUND_TIME);
+});
+
+test('웨이브 2부터 시작 시 tier1 원소 2개 라운드 보상', () => {
+  const g = newGame(seqRng([0]));
+  g.bench = {}; g.towers = []; g.slots = [];
+  g.startWave(); // wave1 — 보상 없음
+  const after1 = Object.values(g.ownedCounts()).reduce((s, n) => s + n, 0);
+  g.startWave(); // wave2 — +2
+  const after2 = Object.values(g.ownedCounts()).reduce((s, n) => s + n, 0);
+  assert.equal(after2 - after1, CONFIG.WAVE_CLEAR_ELEMENTS);
+});
+
+test('보스 처치 시 원소 선택권 지급 (보스 인덱스별 ×3)', () => {
+  const g = newGame(seqRng([0]));
+  g.bossTokens = 0;
+  g._onKill({ role: 'boss', bossIndex: 1 }); // w10
   assert.equal(g.bossTokens, 1);
-  g.wave = 20; g._wasBoss = true; g.phase = 'combat'; g.enemies = [];
-  g.update(0.1);
+  g._onKill({ role: 'boss', bossIndex: 2 }); // w20
   assert.equal(g.bossTokens, 1 + 3);
+  g._onKill({ role: 'boss', bossIndex: 4 }); // w40
+  assert.equal(g.bossTokens, 1 + 3 + 27);
 });
 
-test('40웨이브 클리어 시 승리', () => {
+test('마지막 웨이브 후 전멸하면 승리', () => {
   const g = newGame(seqRng([0]));
-  g.phase = 'combat'; g.enemies = []; g.wave = 40; g._wasBoss = true;
+  g.path = [{ x: 0, y: 0 }, { x: 10, y: 0 }, { x: 10, y: 10 }, { x: 0, y: 10 }];
+  g.wave = 40; g.spawnQueue = []; g.enemies = [];
   g.update(0.1);
   assert.equal(g.victory, true);
 });

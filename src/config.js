@@ -28,6 +28,7 @@ var CONFIG = {
   GAME_OVER_CAP: 100,
   DANGER_THRESHOLD: 80, // 위기 게이지 경고 표시 기준
   MAX_WAVE: 40,
+  ROUND_TIME: 30, // 한 라운드(웨이브 간격) 초 — 지나면 자동으로 다음 웨이브
 
   // 경제
   START_GOLD: 600,       // 시작 골드 (랜덤 뽑기 100G로 시작 유닛 구성)
