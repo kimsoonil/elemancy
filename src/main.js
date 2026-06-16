@@ -130,8 +130,12 @@ async function boot() {
     }
   }
 
-  // ── 매 프레임 새로 그리는 동적 패널 ──
+  // ── 동적 패널: 상태가 바뀔 때만 다시 그린다(매 프레임 재생성 시 클릭이 씹힘) ──
+  let tokSig = null;
   function renderTokens() {
+    const sig = String(game.bossTokens);
+    if (sig === tokSig) return;
+    tokSig = sig;
     tokenPanel.innerHTML = '';
     if (game.bossTokens <= 0) {
       tokenPanel.innerHTML = '<span class="muted">보스를 잡으면 원하는 원소를 받을 수 있어요</span>';
@@ -149,9 +153,18 @@ async function boot() {
     tokenPanel.appendChild(row);
   }
 
+  let selSig = null;
   function renderSelected() {
-    selectedPanel.innerHTML = '';
     const sel = game.towers.find((t) => t.uid === game.selectedUid);
+    // 이 유닛이 재료로 들어가는, 지금 만들 수 있는 조합
+    const craftable = sel ? new Set(game.alchemy.craftable(game.ownedCounts())) : null;
+    const uses = sel ? game.alchemy.usages(sel.unitId).filter((id) => craftable.has(id)) : [];
+    // 변경이 없으면 다시 그리지 않음(매 프레임 재생성 시 버튼 클릭이 씹힘)
+    const sig = `${sel ? sel.uid : ''}|${sel ? sel.unitId : ''}|${game.moveMode}|${uses.join(',')}`;
+    if (sig === selSig) return;
+    selSig = sig;
+
+    selectedPanel.innerHTML = '';
     if (!sel) {
       selectedPanel.innerHTML = '<span class="muted">보드의 유닛을 클릭하면 이동·조합할 수 있어요</span>';
       return;
@@ -170,9 +183,6 @@ async function boot() {
     actions.appendChild(moveBtn);
     selectedPanel.appendChild(actions);
 
-    // 이 유닛이 재료로 들어가는, 지금 만들 수 있는 조합
-    const craftable = new Set(game.alchemy.craftable(game.ownedCounts()));
-    const uses = game.alchemy.usages(sel.unitId).filter((id) => craftable.has(id));
     if (uses.length) {
       const row = document.createElement('div');
       row.className = 'btn-row';
