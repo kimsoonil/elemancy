@@ -15,58 +15,97 @@
       --muted: #8b93c4;
     }
     * { box-sizing: border-box; }
+    html, body { height: 100%; }
     body {
-      margin: 0; min-height: 100vh; color: var(--text);
+      margin: 0; color: var(--text); height: 100vh; overflow: hidden;
       font-family: 'Pretendard', system-ui, -apple-system, sans-serif;
       background:
         radial-gradient(1200px 700px at 18% -10%, #1a1f4d 0%, transparent 55%),
         radial-gradient(1000px 600px at 110% 110%, #3a1150 0%, transparent 50%),
         var(--bg);
-      display: flex; flex-direction: row; gap: 18px; align-items: flex-start;
-      padding: 22px;
+      display: flex; flex-direction: column; gap: 12px; padding: 14px;
     }
-    .stage { flex: 6 1 0; min-width: 0; }
-    #game { width: 100%; height: auto; }   /* 컨테이너(70%) 폭에 맞춰 스케일 */
-    @media (max-width: 900px) {
-      body { flex-direction: column; }
-      .stage, #panel { flex: none; width: 100%; }
+    /* 상단 바 */
+    .topbar {
+      flex: 0 0 auto; display: flex; align-items: center; gap: 18px;
+      padding: 10px 18px; border-radius: 14px;
+      background: var(--panel); border: 1px solid var(--line); backdrop-filter: blur(10px);
     }
+    .topbar .brand { font-size: 16px; font-weight: 800; letter-spacing: 3px; text-shadow: 0 0 14px var(--accent2); }
+    .topbar .brand small { font-size: 10px; letter-spacing: 1px; color: var(--muted); margin-left: 8px; text-shadow: none; }
+    .round-display {
+      margin-left: auto; display: flex; align-items: center; gap: 14px; font-size: 15px;
+    }
+    .round-display .pill {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      padding: 6px 16px; border-radius: 999px; font-weight: 800;
+      box-shadow: 0 0 16px rgba(123,140,255,0.4); white-space: nowrap;
+    }
+    .round-display .timer { font-variant-numeric: tabular-nums; }
+    .round-display .timer b { font-size: 20px; color: #ffd23c; }
+    .icon-btn {
+      width: auto; margin: 0; padding: 9px 14px; font-size: 14px;
+      background: rgba(123,140,255,0.16); border: 1px solid var(--line); box-shadow: none;
+    }
+    .icon-btn:hover { background: rgba(123,140,255,0.3); }
+
+    /* 메인: 보드 + 패널 */
+    .main { flex: 1 1 auto; min-height: 0; display: flex; gap: 14px; }
     .stage {
+      flex: 6 1 0; min-width: 0;
       position: relative; border-radius: 18px; padding: 8px;
       background: linear-gradient(135deg, rgba(123,140,255,0.25), rgba(210,75,255,0.18));
       box-shadow: 0 0 60px rgba(90,80,200,0.25);
+      display: flex; align-items: center; justify-content: center;
     }
     #game {
       display: block; border-radius: 12px;
       box-shadow: inset 0 0 40px rgba(0,0,0,0.6);
+      /* 표시 크기는 JS(fitCanvas)가 뷰포트 높이에 맞춰 설정 */
     }
     .title {
-      position: absolute; top: 16px; left: 20px; margin: 0;
-      font-size: 15px; letter-spacing: 3px; font-weight: 700;
-      color: #fff; text-shadow: 0 0 14px var(--accent2); pointer-events: none;
-      opacity: 0.9;
+      position: absolute; top: 14px; left: 18px; margin: 0;
+      font-size: 13px; letter-spacing: 2px; font-weight: 700;
+      color: #fff; text-shadow: 0 0 14px var(--accent2); pointer-events: none; opacity: 0.85;
     }
-    .title small { display:block; font-size:10px; letter-spacing:2px; color:var(--muted); text-shadow:none; }
+    .title small { display:block; font-size:9px; letter-spacing:1px; color:var(--muted); text-shadow:none; }
 
     #panel {
-      flex: 4 1 0; min-width: 0;
-      padding: 16px; border-radius: 16px;
+      flex: 4 1 0; min-width: 0; height: 100%; overflow-y: auto;
+      padding: 14px; border-radius: 16px;
       background: var(--panel); backdrop-filter: blur(10px);
       border: 1px solid var(--line);
       box-shadow: 0 10px 40px rgba(0,0,0,0.45);
-      display: grid; gap: 12px; align-content: start;
+      display: grid; gap: 8px; align-content: start;
       grid-template-columns: repeat(2, minmax(0, 1fr));   /* 2열 */
     }
-    /* 좁은 화면에서는 1열로 */
-    @media (max-width: 760px) { #panel { grid-template-columns: 1fr; } }
+
+    /* 조합식 팝업 */
+    .modal { position: fixed; inset: 0; background: rgba(4,4,12,0.72); display: flex;
+      align-items: center; justify-content: center; z-index: 50; padding: 24px; }
+    .modal.hidden { display: none; }
+    .modal-card {
+      background: #12152e; border: 1px solid var(--line); border-radius: 16px;
+      width: min(820px, 100%); max-height: 86vh; overflow-y: auto; padding: 22px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    }
+    .modal-card h2 { margin: 0 0 4px; font-size: 18px; }
+    .modal-head { display: flex; align-items: center; margin-bottom: 14px; }
+    .modal-head .close { margin-left: auto; width: auto; padding: 6px 12px; background: rgba(255,255,255,0.08); box-shadow: none; }
+    .tier-block { margin-bottom: 16px; }
+    .tier-block h3 { font-size: 13px; color: var(--accent); margin: 0 0 8px; letter-spacing: 1px; }
+    .recipe-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
+    .recipe { background: rgba(255,255,255,0.04); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-size: 13px; }
+    .recipe .res { font-weight: 700; }
+    .recipe .ing { color: var(--muted); font-size: 12px; margin-top: 3px; }
     /* renderHud가 만드는 섹션 div들을 패널 그리드의 직접 자식으로 승격 */
     #hud { display: contents; }
     .sec {
       background: rgba(255,255,255,0.035); border: 1px solid var(--line);
-      border-radius: 12px; padding: 14px;
+      border-radius: 12px; padding: 10px 12px;
     }
-    .sec h4 { margin: 0 0 10px; font-size: 11px; letter-spacing: 1.5px; color: var(--muted); font-weight: 700; }
-    .hud-row { display: flex; align-items: center; gap: 8px; font-size: 15px; margin: 8px 0; }
+    .sec h4 { margin: 0 0 6px; font-size: 11px; letter-spacing: 1.5px; color: var(--muted); font-weight: 700; }
+    .hud-row { display: flex; align-items: center; gap: 8px; font-size: 15px; margin: 4px 0; }
     .hud-row b { font-size: 17px; }
     .muted { color: var(--muted); font-size: 12px; }
     .wave-badge {
@@ -97,7 +136,7 @@
     hr { border: 0; border-top: 1px solid var(--line); margin: 16px 0; }
 
     button {
-      margin: 3px 0; padding: 10px 14px; width: 100%;
+      margin: 2px 0; padding: 8px 14px; width: 100%;
       background: linear-gradient(135deg, var(--accent), #5a63d8);
       color: #fff; border: 0; border-radius: 10px; cursor: pointer;
       font-size: 14px; font-weight: 600; letter-spacing: .5px;
@@ -139,6 +178,15 @@
   </style>
 </head>
 <body>
+  <header class="topbar">
+    <div class="brand">ELEMANCY<small>원소 연금술 조합 디펜스</small></div>
+    <div class="round-display">
+      <span class="pill"><b id="topRound">0</b> 라운드</span>
+      <span class="timer">⏱ <b id="topTimer">30</b>초</span>
+    </div>
+    <button id="recipeBtn" class="icon-btn">📜 조합식</button>
+  </header>
+  <div class="main">
   <div class="stage">
     <canvas id="game" width="640" height="640"></canvas>
     <h1 class="title">ELEMANCY<small>원소 연금술 조합 디펜스</small></h1>
@@ -180,6 +228,18 @@
       <div id="tokenPanel"></div>
     </div>
   </div>
+  </div>
+
+  <div id="recipeModal" class="modal hidden">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h2>📜 조합식 — 원소 연금술 트리</h2>
+        <button class="close" id="recipeClose">✕ 닫기</button>
+      </div>
+      <div id="recipeBody"></div>
+    </div>
+  </div>
+
   <script src="src/config.js"></script>
   <script src="src/balance.js"></script>
   <script src="src/alchemy.js"></script>

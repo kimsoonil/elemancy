@@ -28,11 +28,46 @@ async function boot() {
   const gachaPanel = document.getElementById('gachaPanel');
   const tokenPanel = document.getElementById('tokenPanel');
   const logEl = document.getElementById('log');
+  const topRound = document.getElementById('topRound');
+  const topTimer = document.getElementById('topTimer');
 
   function flash(msg, kind) {
     logEl.textContent = msg;
     logEl.className = 'log' + (kind ? ' ' + kind : '');
   }
+
+  // 캔버스를 뷰포트(가로 스테이지 폭 / 세로 높이)에 맞춰 정사각으로 스케일 → 스크롤 방지
+  function fitCanvas() {
+    const stage = canvas.parentElement;
+    const size = Math.max(220, Math.min(stage.clientWidth - 16, window.innerHeight - 120));
+    canvas.style.width = size + 'px';
+    canvas.style.height = size + 'px';
+  }
+  window.addEventListener('resize', fitCanvas);
+
+  // 📜 조합식 팝업
+  const recipeModal = document.getElementById('recipeModal');
+  let recipesBuilt = false;
+  function buildRecipes() {
+    if (recipesBuilt) return; recipesBuilt = true;
+    const byTier = { 1: [], 2: [], 3: [], 4: [], 5: [] };
+    for (const e of recipes.elements) byTier[1].push(e);
+    for (const r of recipes.recipes) byTier[r.tier].push(r);
+    const tierName = { 1: '1단계 · 기본 원소', 2: '2단계', 3: '3단계', 4: '4단계', 5: '5단계 · 천체' };
+    let html = '';
+    for (let t = 1; t <= 5; t++) {
+      html += `<div class="tier-block"><h3>${tierName[t]}</h3><div class="recipe-grid">`;
+      for (const u of byTier[t]) {
+        const ing = u.inputs ? u.inputs.map((id) => alchemy.name(id)).join(' + ') : '기본 원소';
+        html += `<div class="recipe"><div class="res">${alchemy.name(u.id)}</div><div class="ing">${ing}</div></div>`;
+      }
+      html += '</div></div>';
+    }
+    document.getElementById('recipeBody').innerHTML = html;
+  }
+  document.getElementById('recipeBtn').onclick = () => { buildRecipes(); recipeModal.classList.remove('hidden'); };
+  document.getElementById('recipeClose').onclick = () => recipeModal.classList.add('hidden');
+  recipeModal.onclick = (e) => { if (e.target === recipeModal) recipeModal.classList.add('hidden'); };
 
   document.getElementById('nextWave').onclick = () => game.startWave();
 
@@ -207,7 +242,10 @@ async function boot() {
     const dt = Math.min((t - last) / 1000, 0.05);
     last = t;
     game.update(dt);
+    fitCanvas();
     drawGame(ctx, game);
+    topRound.textContent = game.wave;
+    topTimer.textContent = game.wave >= CONFIG.MAX_WAVE ? '—' : Math.max(0, Math.ceil(game.roundTimer));
     waveInfo.innerHTML = renderWaveInfo(game);
     resourceInfo.innerHTML = renderResources(game);
     hud.innerHTML = renderHud(game);
