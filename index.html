@@ -44,14 +44,16 @@
     .title small { display:block; font-size:10px; letter-spacing:2px; color:var(--muted); text-shadow:none; }
 
     #panel {
-      flex: 1 1 320px; min-width: 300px; max-width: 420px;
+      flex: 1 1 480px; min-width: 460px;
       padding: 16px; border-radius: 16px;
       background: var(--panel); backdrop-filter: blur(10px);
       border: 1px solid var(--line);
       box-shadow: 0 10px 40px rgba(0,0,0,0.45);
       display: grid; gap: 12px; align-content: start;
-      grid-template-columns: 1fr;   /* 세로 1열 */
+      grid-template-columns: repeat(2, minmax(0, 1fr));   /* 2열 */
     }
+    /* 좁은 화면에서는 1열로 */
+    @media (max-width: 760px) { #panel { grid-template-columns: 1fr; } }
     /* renderHud가 만드는 섹션 div들을 패널 그리드의 직접 자식으로 승격 */
     #hud { display: contents; }
     .sec {
@@ -133,7 +135,7 @@
 </head>
 <body>
   <div class="stage">
-    <canvas id="game" width="520" height="520"></canvas>
+    <canvas id="game" width="640" height="640"></canvas>
     <h1 class="title">ELEMANCY<small>원소 연금술 조합 디펜스</small></h1>
   </div>
   <div id="panel">

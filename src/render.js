@@ -1,4 +1,4 @@
-const TILE = 52; // 1 격자 단위 = 52px (보드+패널이 한 화면에 들어오도록)
+const TILE = 64; // 1 격자 단위 = 64px
 
 // 공격 타입별 네온 색
 const TYPE_COLOR = { aoe: '#ff6a3d', single: '#7b8cff', slow: '#3fd7ff', buff: '#5cf08a' };
