@@ -95,3 +95,12 @@ test('tick — 적은 죽지 않으면 경로를 계속 돈다(누수/제거 없
   assert.equal(enemies.length, 1);
   assert.ok(enemies[0].pathPos < 40);
 });
+
+test('tick — dmgScale로 업그레이드 배수 반영', () => {
+  const Combat = require('../src/combat.js');
+  const path = [{ x: 0, y: 0 }, { x: 10, y: 0 }, { x: 10, y: 10 }, { x: 0, y: 10 }];
+  const enemies = [{ uid: 'e', role: 'swarm', hp: 100, maxHp: 100, baseSpeed: 0, pathPos: 0, x: 0, y: 0, slowUntil: 0 }];
+  const towers = [{ uid: 't', atkType: 'single', damage: 10, atkSpeed: 1, range: 3, x: 0, y: 0, cooldown: 0, tier: 1 }];
+  Combat.tick({ towers, enemies, path, dmgScale: () => 2 }, 1, 0, () => {});
+  assert.equal(enemies[0].hp, 80); // 10 × 2배 = 20 데미지
+});

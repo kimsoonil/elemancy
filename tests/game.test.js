@@ -147,3 +147,56 @@ test('redeemToken — 보스 토큰으로 원하는 tier1 원소 획득', () => 
   g.bossTokens = 0;
   assert.equal(g.redeemToken('fire'), false);
 });
+
+test('startWave — 웨이브+1, 전투 전환, 스폰 큐 적재(HP 공식 적용)', () => {
+  const g = newGame(seqRng([0]));
+  g.path = [{ x: 0, y: 0 }, { x: 10, y: 0 }, { x: 10, y: 10 }, { x: 0, y: 10 }];
+  g.startWave();
+  assert.equal(g.wave, 1);
+  assert.equal(g.phase, 'combat');
+  assert.ok(g.spawnQueue.length > 0);
+  for (const s of g.spawnQueue) assert.ok(s.hp > 0);
+  g.update(0.5);
+  assert.ok(g.enemies.length >= 1);
+  assert.equal(g.enemies[0].maxHp, g.enemies[0].hp);
+});
+
+test('boardWeight — 일반 1, 보스 8 카운트', () => {
+  const g = newGame(seqRng([0]));
+  g.enemies = [{ role: 'swarm' }, { role: 'tank' }, { role: 'boss' }];
+  assert.equal(g.boardWeight(), 1 + 1 + 8);
+});
+
+test('게임오버 — 보드 가중치 > 100', () => {
+  const g = newGame(seqRng([0]));
+  g.enemies = Array.from({ length: 101 }, () => ({ role: 'swarm' }));
+  g.checkGameOver();
+  assert.equal(g.gameOver, true);
+});
+
+test('웨이브 클리어 — 적 전멸 시 prep 복귀 + tier1 원소 2개 지급', () => {
+  const g = newGame(seqRng([0]));
+  g.bench = {}; g.towers = [];
+  g.phase = 'combat'; g.wave = 3; g.enemies = [];
+  g.update(0.1);
+  assert.equal(g.phase, 'prep');
+  assert.equal(Object.values(g.ownedCounts()).reduce((s, n) => s + n, 0), 2);
+});
+
+test('보스 웨이브 클리어 시 보스 토큰 ×3 지급', () => {
+  const g = newGame(seqRng([0]));
+  g.phase = 'combat'; g.enemies = [];
+  g.wave = 10; g._wasBoss = true;
+  g.update(0.1);
+  assert.equal(g.bossTokens, 1);
+  g.wave = 20; g._wasBoss = true; g.phase = 'combat'; g.enemies = [];
+  g.update(0.1);
+  assert.equal(g.bossTokens, 1 + 3);
+});
+
+test('40웨이브 클리어 시 승리', () => {
+  const g = newGame(seqRng([0]));
+  g.phase = 'combat'; g.enemies = []; g.wave = 40; g._wasBoss = true;
+  g.update(0.1);
+  assert.equal(g.victory, true);
+});

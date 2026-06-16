@@ -1,6 +1,7 @@
 const CONFIG = (typeof require !== 'undefined') ? require('./config.js') : globalThis.CONFIG;
 const Stats = (typeof require !== 'undefined') ? require('./stats.js') : globalThis.stats;
 const balance = (typeof require !== 'undefined') ? require('./balance.js') : globalThis.balance;
+const Combat = (typeof require !== 'undefined') ? require('./combat.js') : globalThis.combat;
 
 class Game {
   constructor({ alchemy, waveSystem, rng = Math.random }) {
@@ -19,6 +20,11 @@ class Game {
     this.victory = false;
     this._uid = 0;
     this._tier1 = alchemy.byTier(1).map((u) => u.id);
+    this.path = [];        // main에서 주입
+    this.now = 0;          // 누적 시각(초)
+    this.spawnQueue = [];  // [{id, role, hp}] 남은 스폰
+    this.spawnTimer = 0;
+    this._wasBoss = false;
     this.grantRandomElements(CONFIG.START_ELEMENTS);
   }
 
@@ -143,6 +149,90 @@ class Game {
     this.bossTokens -= 1;
     this.bench[elementId] = (this.bench[elementId] || 0) + 1;
     return true;
+  }
+
+  /** 보드 위 적의 가중치 합(보스 8). */
+  boardWeight() {
+    return this.enemies.reduce(
+      (s, e) => s + (e.role === 'boss' ? CONFIG.BOSS_CAP_WEIGHT : 1), 0
+    );
+  }
+
+  checkGameOver() {
+    if (this.boardWeight() > CONFIG.GAME_OVER_CAP) this.gameOver = true;
+  }
+
+  /** 다음 웨이브 시작: 적 구성 → 스폰 큐 적재, 전투 단계로. */
+  startWave() {
+    if (this.phase !== 'prep' || this.gameOver || this.victory) return;
+    this.wave += 1;
+    this.phase = 'combat';
+    const comp = this.waveSystem.composeWave(this.wave);
+    this._wasBoss = comp.type === 'boss';
+    const normals = comp.spawns.filter((s) => s.role !== 'boss');
+    const rawTotal = normals.reduce((s, x) => s + x.count, 0) || 1;
+    const scale = CONFIG.SPAWN_PER_ROUND / rawTotal;
+    const queue = [];
+    for (const s of normals) {
+      const n = Math.max(1, Math.round(s.count * scale));
+      for (let i = 0; i < n; i++) {
+        queue.push({ id: s.id, role: s.role, hp: balance.enemyHP(s.role, this.wave) });
+      }
+    }
+    for (const s of comp.spawns.filter((x) => x.role === 'boss')) {
+      queue.push({ id: s.id, role: s.role, hp: balance.enemyHP('boss', this.wave) });
+    }
+    this.spawnQueue = queue;
+    this.spawnTimer = 0;
+  }
+
+  /** 스폰 큐에서 0.4초 간격으로 1마리씩 경로 시작점에 투입. */
+  _spawnTick(dt) {
+    if (this.spawnQueue.length === 0) return;
+    this.spawnTimer -= dt;
+    if (this.spawnTimer > 0) return;
+    this.spawnTimer = 0.4;
+    const s = this.spawnQueue.shift();
+    const start = this.path.length ? this.path[0] : { x: 0, y: 0 };
+    this.enemies.push({
+      uid: this.nextUid(),
+      id: s.id, role: s.role,
+      hp: s.hp, maxHp: s.hp,
+      baseSpeed: 1.0,
+      x: start.x, y: start.y, pathPos: 0, slowUntil: 0,
+    });
+  }
+
+  /** 전투 중 적 사망 시 골드 지급 콜백. */
+  _onKill(enemy) {
+    this.gold += CONFIG.GOLD_PER_KILL[enemy.role] || 5;
+  }
+
+  /** 웨이브 클리어 처리: 보상 지급 + prep 복귀(또는 승리). */
+  _clearWave() {
+    this.phase = 'prep';
+    if (this._wasBoss) {
+      const bossIndex = this.wave / 10;
+      this.bossTokens += CONFIG.BOSS_TOKEN_BASE * Math.pow(3, bossIndex - 1);
+      this._wasBoss = false;
+    }
+    if (this.wave >= CONFIG.MAX_WAVE) { this.victory = true; return; }
+    this.grantRandomElements(CONFIG.WAVE_CLEAR_ELEMENTS);
+  }
+
+  /** 메인 루프 1틱. prep에서는 진행하지 않음. */
+  update(dt) {
+    if (this.phase !== 'combat' || this.gameOver || this.victory) return;
+    this.now += dt;
+    this._spawnTick(dt);
+    Combat.tick(
+      { towers: this.towers, enemies: this.enemies, path: this.path, dmgScale: (t) => this.damageMultiplier(t.tier) },
+      dt, this.now, (e) => this._onKill(e)
+    );
+    this.checkGameOver();
+    if (this.spawnQueue.length === 0 && this.enemies.length === 0) {
+      this._clearWave();
+    }
   }
 }
 
