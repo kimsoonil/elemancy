@@ -33,8 +33,11 @@ async function boot() {
   // 보드 클릭 → 벤치 첫 원소 배치
   canvas.onclick = (ev) => {
     const rect = canvas.getBoundingClientRect();
-    const gx = Math.round((ev.clientX - rect.left) / TILE);
-    const gy = Math.round((ev.clientY - rect.top) / TILE);
+    // 캔버스가 CSS로 스케일되므로 내부 해상도 기준으로 환산
+    const sx = canvas.width / rect.width;
+    const sy = canvas.height / rect.height;
+    const gx = Math.round((ev.clientX - rect.left) * sx / TILE);
+    const gy = Math.round((ev.clientY - rect.top) * sy / TILE);
     if (gx <= 1 || gx >= 9 || gy <= 1 || gy >= 9) return; // 안쪽만
     const benchId = Object.keys(game.bench)[0];
     if (benchId) game.place(benchId, { x: gx, y: gy });

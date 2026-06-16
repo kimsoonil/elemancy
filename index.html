@@ -23,9 +23,14 @@
         radial-gradient(1000px 600px at 110% 110%, #3a1150 0%, transparent 50%),
         var(--bg);
       display: flex; flex-direction: row; gap: 18px; align-items: flex-start;
-      padding: 22px; flex-wrap: wrap;
+      padding: 22px;
     }
-    .stage { flex: 0 0 auto; }
+    .stage { flex: 6 1 0; min-width: 0; }
+    #game { width: 100%; height: auto; }   /* 컨테이너(70%) 폭에 맞춰 스케일 */
+    @media (max-width: 900px) {
+      body { flex-direction: column; }
+      .stage, #panel { flex: none; width: 100%; }
+    }
     .stage {
       position: relative; border-radius: 18px; padding: 8px;
       background: linear-gradient(135deg, rgba(123,140,255,0.25), rgba(210,75,255,0.18));
@@ -44,7 +49,7 @@
     .title small { display:block; font-size:10px; letter-spacing:2px; color:var(--muted); text-shadow:none; }
 
     #panel {
-      flex: 1 1 480px; min-width: 460px;
+      flex: 4 1 0; min-width: 0;
       padding: 16px; border-radius: 16px;
       background: var(--panel); backdrop-filter: blur(10px);
       border: 1px solid var(--line);
@@ -67,10 +72,10 @@
     .wave-badge {
       background: linear-gradient(135deg, var(--accent), var(--accent2));
       padding: 4px 12px; border-radius: 999px; font-weight: 700; font-size: 14px;
-      box-shadow: 0 0 16px rgba(123,140,255,0.4);
+      box-shadow: 0 0 16px rgba(123,140,255,0.4); white-space: nowrap;
     }
     .wave-badge .slash { opacity: 0.7; font-weight: 400; }
-    .phase { margin-left: auto; font-size: 13px; color: var(--muted); }
+    .phase { margin-left: auto; font-size: 13px; color: var(--muted); white-space: nowrap; }
     .gold b { color: #ffd23c; }
 
     .cap { margin: 14px 0; }
@@ -115,7 +120,7 @@
     .btn-col { display: flex; flex-direction: column; gap: 6px; }
     .btn-row { display: flex; flex-wrap: wrap; gap: 6px; }
     .mini {
-      width: auto; margin: 0; padding: 8px 10px; font-size: 13px; font-weight: 500;
+      width: auto; margin: 0; padding: 8px 10px; font-size: 12px; font-weight: 500;
       background: rgba(123,140,255,0.14); border: 1px solid var(--line);
       box-shadow: none; display: flex; justify-content: space-between; gap: 8px; align-items: center;
     }
