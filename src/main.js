@@ -22,8 +22,8 @@ async function boot() {
 
   canvas.onclick = (ev) => {
     const rect = canvas.getBoundingClientRect();
-    const gx = Math.round((ev.clientX - rect.left) / 64);
-    const gy = Math.round((ev.clientY - rect.top) / 64);
+    const gx = Math.round((ev.clientX - rect.left) / TILE);
+    const gy = Math.round((ev.clientY - rect.top) / TILE);
     if (gx <= 1 || gx >= 9 || gy <= 1 || gy >= 9) return; // 안쪽만
     const benchId = Object.keys(game.bench)[0];
     if (benchId) game.place(benchId, { x: gx, y: gy });
