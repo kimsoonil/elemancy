@@ -1,7 +1,7 @@
-const CONFIG = (typeof require !== 'undefined') ? require('./config.js') : globalThis.CONFIG;
-const Stats = (typeof require !== 'undefined') ? require('./stats.js') : globalThis.stats;
-const balance = (typeof require !== 'undefined') ? require('./balance.js') : globalThis.balance;
-const Combat = (typeof require !== 'undefined') ? require('./combat.js') : globalThis.combat;
+var CONFIG = (typeof require !== 'undefined') ? require('./config.js') : globalThis.CONFIG;
+var Stats = (typeof require !== 'undefined') ? require('./stats.js') : globalThis.stats;
+var balance = (typeof require !== 'undefined') ? require('./balance.js') : globalThis.balance;
+var Combat = (typeof require !== 'undefined') ? require('./combat.js') : globalThis.combat;
 
 class Game {
   constructor({ alchemy, waveSystem, rng = Math.random }) {

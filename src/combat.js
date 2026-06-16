@@ -1,4 +1,4 @@
-const CONFIG = (typeof require !== 'undefined') ? require('./config.js') : globalThis.CONFIG;
+var CONFIG = (typeof require !== 'undefined') ? require('./config.js') : globalThis.CONFIG;
 
 function dist(a, b) {
   return Math.hypot(a.x - b.x, a.y - b.y);

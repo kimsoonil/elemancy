@@ -1,4 +1,4 @@
-const CONFIG = (typeof require !== 'undefined') ? require('./config.js') : globalThis.CONFIG;
+var CONFIG = (typeof require !== 'undefined') ? require('./config.js') : globalThis.CONFIG;
 
 /** 웨이브의 기본 HP. w1=100, 라운드마다 100×10^(구간-1) 누적. */
 function baseHP(wave) {
@@ -30,6 +30,6 @@ function gambleResult(bet, rand) {
   return Math.floor(rand * (2 * bet + 1)) - bet;
 }
 
-const balance = { baseHP, enemyHP, damageBand, gambleResult };
+var balance = { baseHP, enemyHP, damageBand, gambleResult };
 if (typeof module !== 'undefined' && module.exports) module.exports = balance;
 if (typeof window !== 'undefined') window.balance = balance;

@@ -1,4 +1,4 @@
-const CONFIG = {
+var CONFIG = {
   // 원소 → 공격 타입
   ATK_TYPE: {
     electric: 'aoe', fire: 'aoe',

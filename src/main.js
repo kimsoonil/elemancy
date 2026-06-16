@@ -10,6 +10,9 @@ async function boot() {
   // 정사각 순환 경로 (격자 단위). 캔버스 640px = 10칸.
   game.path = [{ x: 1, y: 1 }, { x: 9, y: 1 }, { x: 9, y: 9 }, { x: 1, y: 9 }];
 
+  // 디버그/플레이테스트용: 콘솔에서 game 상태 점검 가능
+  window.game = game;
+
   const canvas = document.getElementById('game');
   const ctx = canvas.getContext('2d');
   const hud = document.getElementById('hud');

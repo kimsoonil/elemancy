@@ -1,5 +1,5 @@
-const CONFIG = (typeof require !== 'undefined') ? require('./config.js') : globalThis.CONFIG;
-const balance = (typeof require !== 'undefined') ? require('./balance.js') : globalThis.balance;
+var CONFIG = (typeof require !== 'undefined') ? require('./config.js') : globalThis.CONFIG;
+var balance = (typeof require !== 'undefined') ? require('./balance.js') : globalThis.balance;
 
 /** 유닛의 지배 1단계 원소. 최다 구성 원소, 동률이면 inputs[0]을 재귀 추적. */
 function dominantElement(alchemy, id) {
