@@ -22,8 +22,8 @@
         radial-gradient(1200px 700px at 18% -10%, #1a1f4d 0%, transparent 55%),
         radial-gradient(1000px 600px at 110% 110%, #3a1150 0%, transparent 50%),
         var(--bg);
-      display: flex; flex-direction: column; gap: 18px; align-items: center;
-      padding: 22px;
+      display: flex; flex-direction: row; gap: 18px; align-items: flex-start;
+      padding: 22px; flex-wrap: wrap;
     }
     .stage { flex: 0 0 auto; }
     .stage {
@@ -44,16 +44,13 @@
     .title small { display:block; font-size:10px; letter-spacing:2px; color:var(--muted); text-shadow:none; }
 
     #panel {
-      width: 100%; max-width: 1280px; padding: 18px; border-radius: 16px;
+      flex: 1 1 320px; min-width: 300px; max-width: 420px;
+      padding: 16px; border-radius: 16px;
       background: var(--panel); backdrop-filter: blur(10px);
       border: 1px solid var(--line);
       box-shadow: 0 10px 40px rgba(0,0,0,0.45);
-      display: grid; gap: 14px; align-content: start;
-      grid-template-columns: repeat(5, minmax(0, 1fr));
-    }
-    /* 좁은 화면에서는 자동으로 줄바꿈 */
-    @media (max-width: 900px) {
-      #panel { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
+      display: grid; gap: 12px; align-content: start;
+      grid-template-columns: 1fr;   /* 세로 1열 */
     }
     /* renderHud가 만드는 섹션 div들을 패널 그리드의 직접 자식으로 승격 */
     #hud { display: contents; }
@@ -112,6 +109,23 @@
     }
     #combinePanel button:hover { background: rgba(123,140,255,0.3); }
 
+    /* 골드 사용 컨트롤 */
+    .btn-col { display: flex; flex-direction: column; gap: 6px; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 6px; }
+    .mini {
+      width: auto; margin: 0; padding: 8px 10px; font-size: 13px; font-weight: 500;
+      background: rgba(123,140,255,0.14); border: 1px solid var(--line);
+      box-shadow: none; display: flex; justify-content: space-between; gap: 8px; align-items: center;
+    }
+    .mini:hover:not(:disabled) { background: rgba(123,140,255,0.28); }
+    .mini .cost { font-size: 11px; color: #ffd23c; }
+    .btn-row .mini { flex: 1 1 auto; justify-content: center; }
+    .log {
+      margin-top: 6px; font-size: 12px; min-height: 16px; color: var(--muted);
+      transition: color .2s;
+    }
+    .log.good { color: #8bf0a8; } .log.bad { color: #ff8a8a; }
+
     .banner { grid-column: 1 / -1; padding: 12px; border-radius: 10px; text-align: center; font-weight: 700; font-size: 16px; }
     .banner.over { background: rgba(255,60,80,0.18); color: #ff8a8a; border: 1px solid rgba(255,60,80,0.4); }
     .banner.win { background: rgba(95,240,138,0.16); color: #8bf0a8; border: 1px solid rgba(95,240,138,0.4); }
@@ -127,6 +141,23 @@
     <div class="sec" id="actions">
       <h4>⚔️ 전투</h4>
       <button id="nextWave">다음 웨이브 ▶</button>
+      <div class="log" id="log"></div>
+    </div>
+    <div class="sec">
+      <h4>⬆️ 공격력 업그레이드 (레벨당 +1%)</h4>
+      <div id="upgradePanel" class="btn-col"></div>
+    </div>
+    <div class="sec">
+      <h4>🎲 도박 (순손익 −베팅~+베팅)</h4>
+      <div id="gamblePanel" class="btn-row"></div>
+    </div>
+    <div class="sec">
+      <h4>🎰 원소 가챠</h4>
+      <div id="gachaPanel" class="btn-col"></div>
+    </div>
+    <div class="sec" id="tokenCard">
+      <h4>🎟️ 원소 선택권 (보스 처치 보상)</h4>
+      <div id="tokenPanel"></div>
     </div>
     <div class="sec" id="combineCard">
       <h4>⚗️ 조합 가능</h4>
