@@ -133,17 +133,23 @@ function renderHud(game) {
   }).join('') || '<span class="muted">비어있음</span>';
 
   return `
-    <div class="hud-row">
-      <span class="wave-badge">웨이브 ${game.wave}<span class="slash">/${CONFIG.MAX_WAVE}</span></span>
-      <span class="phase">${phaseLabel}</span>
+    <div class="sec">
+      <div class="hud-row">
+        <span class="wave-badge">웨이브 ${game.wave}<span class="slash">/${CONFIG.MAX_WAVE}</span></span>
+        <span class="phase">${phaseLabel}</span>
+      </div>
+      <div class="hud-row gold">🪙 <b>${Math.floor(game.gold)}</b><span class="muted">골드</span></div>
+      <div class="hud-row">🎟️ <b>${game.bossTokens}</b><span class="muted">원소 선택권</span></div>
     </div>
-    <div class="hud-row gold">🪙 <b>${Math.floor(game.gold)}</b><span class="muted">골드</span></div>
-    <div class="cap">
-      <div class="cap-top"><span>🌀 공허 침식</span><b>${w} / ${CONFIG.GAME_OVER_CAP}</b></div>
+    <div class="sec">
+      <h4>🌀 공허 침식</h4>
+      <div class="cap-top"><span class="muted">보드 위 몬스터</span><b>${w} / ${CONFIG.GAME_OVER_CAP}</b></div>
       <div class="bar"><div class="bar-fill" style="width:${pct}%;background:${barColor}"></div></div>
     </div>
-    <div class="hud-row">🎟️ <b>${game.bossTokens}</b><span class="muted">원소 선택권</span></div>
-    <div class="bench-box"><div class="bench-label">벤치</div><div class="chips">${chips}</div></div>
+    <div class="sec">
+      <h4>🎒 벤치</h4>
+      <div class="chips">${chips}</div>
+    </div>
     ${game.gameOver ? '<div class="banner over">💀 게임 오버</div>' : ''}
     ${game.victory ? '<div class="banner win">🌌 승리! 40웨이브 클리어</div>' : ''}
   `;

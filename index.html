@@ -25,6 +25,7 @@
       display: flex; gap: 18px; align-items: flex-start;
       padding: 22px; flex-wrap: wrap;
     }
+    .stage { flex: 0 0 auto; }
     .stage {
       position: relative; border-radius: 18px; padding: 8px;
       background: linear-gradient(135deg, rgba(123,140,255,0.25), rgba(210,75,255,0.18));
@@ -43,11 +44,20 @@
     .title small { display:block; font-size:10px; letter-spacing:2px; color:var(--muted); text-shadow:none; }
 
     #panel {
-      width: 300px; padding: 18px; border-radius: 16px;
+      flex: 1 1 360px; min-width: 320px; padding: 18px; border-radius: 16px;
       background: var(--panel); backdrop-filter: blur(10px);
       border: 1px solid var(--line);
       box-shadow: 0 10px 40px rgba(0,0,0,0.45);
+      display: grid; gap: 14px; align-content: start;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     }
+    /* renderHud가 만드는 섹션 div들을 패널 그리드의 직접 자식으로 승격 */
+    #hud { display: contents; }
+    .sec {
+      background: rgba(255,255,255,0.035); border: 1px solid var(--line);
+      border-radius: 12px; padding: 14px;
+    }
+    .sec h4 { margin: 0 0 10px; font-size: 11px; letter-spacing: 1.5px; color: var(--muted); font-weight: 700; }
     .hud-row { display: flex; align-items: center; gap: 8px; font-size: 15px; margin: 8px 0; }
     .hud-row b { font-size: 17px; }
     .muted { color: var(--muted); font-size: 12px; }
@@ -98,7 +108,7 @@
     }
     #combinePanel button:hover { background: rgba(123,140,255,0.3); }
 
-    .banner { margin-top: 14px; padding: 12px; border-radius: 10px; text-align: center; font-weight: 700; font-size: 16px; }
+    .banner { grid-column: 1 / -1; padding: 12px; border-radius: 10px; text-align: center; font-weight: 700; font-size: 16px; }
     .banner.over { background: rgba(255,60,80,0.18); color: #ff8a8a; border: 1px solid rgba(255,60,80,0.4); }
     .banner.win { background: rgba(95,240,138,0.16); color: #8bf0a8; border: 1px solid rgba(95,240,138,0.4); }
   </style>
@@ -110,12 +120,14 @@
   </div>
   <div id="panel">
     <div class="hud" id="hud"></div>
-    <hr />
-    <div id="actions">
+    <div class="sec" id="actions">
+      <h4>⚔️ 전투</h4>
       <button id="nextWave">다음 웨이브 ▶</button>
     </div>
-    <div class="section-title">⚗️ 조합 가능</div>
-    <div id="combinePanel"></div>
+    <div class="sec" id="combineCard">
+      <h4>⚗️ 조합 가능</h4>
+      <div id="combinePanel"></div>
+    </div>
   </div>
   <script src="src/config.js"></script>
   <script src="src/balance.js"></script>
