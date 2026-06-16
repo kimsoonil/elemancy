@@ -28,3 +28,40 @@ test('selectTargets — 광역은 사거리 내 전체', () => {
 test('selectTargets — 버프 타워는 타겟 없음', () => {
   assert.deepEqual(Combat.selectTargets(tower({ atkType: 'buff' }), [enemy()]), []);
 });
+
+test('buffMultipliers — 버프 타워 반경 내면 공격력↑·공속 오버라이드', () => {
+  const Combat = require('../src/combat.js');
+  const buffT = { uid: 'b', atkType: 'buff', x: 0, y: 0, range: 0 };
+  const ally = { uid: 'a', atkType: 'single', x: 1, y: 0, damage: 100, atkSpeed: 1 };
+  const m = Combat.buffMultipliers(ally, [buffT]);
+  assert.equal(m.dmgMult, 1.25);
+  assert.equal(m.atkSpeed, 1.75);
+});
+
+test('buffMultipliers — 버프 없으면 기본', () => {
+  const Combat = require('../src/combat.js');
+  const ally = { uid: 'a', atkType: 'single', x: 100, y: 0, atkSpeed: 1 };
+  const m = Combat.buffMultipliers(ally, []);
+  assert.equal(m.dmgMult, 1);
+  assert.equal(m.atkSpeed, 1); // 자기 공속 유지
+});
+
+test('resolveHit — 단일은 데미지만, 슬로우는 둔화까지', () => {
+  const Combat = require('../src/combat.js');
+  const e1 = { hp: 100, slowUntil: 0 };
+  Combat.resolveHit({ atkType: 'single', damage: 30 }, e1, 0);
+  assert.equal(e1.hp, 70);
+  assert.equal(e1.slowUntil, 0);
+
+  const e2 = { hp: 100, slowUntil: 0 };
+  Combat.resolveHit({ atkType: 'slow', damage: 30 }, e2, 5);
+  assert.equal(e2.hp, 70);
+  assert.equal(e2.slowUntil, 7); // now(5) + SLOW_DURATION(2)
+});
+
+test('effectiveSpeed — 슬로우 적용 중이면 ×SLOW_FACTOR', () => {
+  const Combat = require('../src/combat.js');
+  const e = { baseSpeed: 1, slowUntil: 10 };
+  assert.equal(Combat.effectiveSpeed(e, 5), 0.6);  // 슬로우 중
+  assert.equal(Combat.effectiveSpeed(e, 11), 1.0); // 만료
+});
