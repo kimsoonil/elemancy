@@ -31,8 +31,12 @@ async function boot() {
 
   function renderCombine() {
     const owned = game.ownedCounts();
-    combinePanel.innerHTML = '<hr/><div>조합 가능:</div>';
+    combinePanel.innerHTML = '';
     const craftable = game.alchemy.craftable(owned);
+    if (craftable.length === 0) {
+      combinePanel.innerHTML = '<span class="muted">조합할 재료가 부족합니다</span>';
+      return;
+    }
     for (const id of craftable) {
       const btn = document.createElement('button');
       btn.textContent = `${game.alchemy.name(id)} 조합`;

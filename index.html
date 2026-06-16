@@ -2,25 +2,119 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <title>Elemancy — 원소 연금술 조합 디펜스 (프로토타입)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Elemancy — 원소 연금술 조합 디펜스</title>
   <style>
-    body { margin: 0; background: #0b0d17; color: #e6e8f0; font-family: system-ui, sans-serif; display: flex; }
-    #game { display: block; background: #11142a; }
-    #panel { width: 280px; padding: 12px; }
-    .hud { font-size: 14px; line-height: 1.8; }
-    button { margin: 2px; padding: 6px 10px; background: #2a3170; color: #fff; border: 0; border-radius: 6px; cursor: pointer; }
-    button:disabled { opacity: .4; cursor: default; }
-    .danger { color: #ff7a7a; }
+    :root {
+      --bg: #06060f;
+      --panel: rgba(20, 24, 52, 0.72);
+      --line: rgba(120, 140, 255, 0.18);
+      --accent: #7b8cff;
+      --accent2: #d24bff;
+      --text: #e9ecff;
+      --muted: #8b93c4;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; color: var(--text);
+      font-family: 'Pretendard', system-ui, -apple-system, sans-serif;
+      background:
+        radial-gradient(1200px 700px at 18% -10%, #1a1f4d 0%, transparent 55%),
+        radial-gradient(1000px 600px at 110% 110%, #3a1150 0%, transparent 50%),
+        var(--bg);
+      display: flex; gap: 18px; align-items: flex-start;
+      padding: 22px; flex-wrap: wrap;
+    }
+    .stage {
+      position: relative; border-radius: 18px; padding: 8px;
+      background: linear-gradient(135deg, rgba(123,140,255,0.25), rgba(210,75,255,0.18));
+      box-shadow: 0 0 60px rgba(90,80,200,0.25);
+    }
+    #game {
+      display: block; border-radius: 12px;
+      box-shadow: inset 0 0 40px rgba(0,0,0,0.6);
+    }
+    .title {
+      position: absolute; top: 16px; left: 20px; margin: 0;
+      font-size: 15px; letter-spacing: 3px; font-weight: 700;
+      color: #fff; text-shadow: 0 0 14px var(--accent2); pointer-events: none;
+      opacity: 0.9;
+    }
+    .title small { display:block; font-size:10px; letter-spacing:2px; color:var(--muted); text-shadow:none; }
+
+    #panel {
+      width: 300px; padding: 18px; border-radius: 16px;
+      background: var(--panel); backdrop-filter: blur(10px);
+      border: 1px solid var(--line);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.45);
+    }
+    .hud-row { display: flex; align-items: center; gap: 8px; font-size: 15px; margin: 8px 0; }
+    .hud-row b { font-size: 17px; }
+    .muted { color: var(--muted); font-size: 12px; }
+    .wave-badge {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      padding: 4px 12px; border-radius: 999px; font-weight: 700; font-size: 14px;
+      box-shadow: 0 0 16px rgba(123,140,255,0.4);
+    }
+    .wave-badge .slash { opacity: 0.7; font-weight: 400; }
+    .phase { margin-left: auto; font-size: 13px; color: var(--muted); }
+    .gold b { color: #ffd23c; }
+
+    .cap { margin: 14px 0; }
+    .cap-top { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 5px; }
+    .bar { height: 9px; border-radius: 999px; background: rgba(255,255,255,0.08); overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 999px; transition: width .2s, background .2s; box-shadow: 0 0 10px currentColor; }
+
+    .bench-box { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 12px; }
+    .bench-label { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .chip {
+      font-size: 12px; padding: 3px 9px; border-radius: 999px;
+      background: color-mix(in srgb, var(--c) 22%, transparent);
+      border: 1px solid color-mix(in srgb, var(--c) 60%, transparent);
+      color: #fff; box-shadow: 0 0 8px color-mix(in srgb, var(--c) 35%, transparent);
+    }
+    .chip b { margin-left: 3px; opacity: 0.85; }
+
+    hr { border: 0; border-top: 1px solid var(--line); margin: 16px 0; }
+
+    button {
+      margin: 3px 0; padding: 10px 14px; width: 100%;
+      background: linear-gradient(135deg, var(--accent), #5a63d8);
+      color: #fff; border: 0; border-radius: 10px; cursor: pointer;
+      font-size: 14px; font-weight: 600; letter-spacing: .5px;
+      transition: transform .08s, box-shadow .2s;
+      box-shadow: 0 4px 16px rgba(90,99,216,0.35);
+    }
+    button:hover { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(123,140,255,0.55); }
+    button:active { transform: translateY(0); }
+    #nextWave { background: linear-gradient(135deg, #ff7a3d, #ff3d7a); box-shadow: 0 4px 16px rgba(255,90,80,0.4); }
+
+    .section-title { font-size: 12px; color: var(--muted); margin: 14px 0 6px; letter-spacing: 1px; }
+    #combinePanel button {
+      width: auto; display: inline-block; margin: 3px;
+      background: rgba(123,140,255,0.16); border: 1px solid var(--line);
+      box-shadow: none; font-weight: 500; padding: 7px 11px;
+    }
+    #combinePanel button:hover { background: rgba(123,140,255,0.3); }
+
+    .banner { margin-top: 14px; padding: 12px; border-radius: 10px; text-align: center; font-weight: 700; font-size: 16px; }
+    .banner.over { background: rgba(255,60,80,0.18); color: #ff8a8a; border: 1px solid rgba(255,60,80,0.4); }
+    .banner.win { background: rgba(95,240,138,0.16); color: #8bf0a8; border: 1px solid rgba(95,240,138,0.4); }
   </style>
 </head>
 <body>
-  <canvas id="game" width="640" height="640"></canvas>
+  <div class="stage">
+    <canvas id="game" width="640" height="640"></canvas>
+    <h1 class="title">ELEMANCY<small>원소 연금술 조합 디펜스</small></h1>
+  </div>
   <div id="panel">
     <div class="hud" id="hud"></div>
     <hr />
     <div id="actions">
       <button id="nextWave">다음 웨이브 ▶</button>
     </div>
+    <div class="section-title">⚗️ 조합 가능</div>
     <div id="combinePanel"></div>
   </div>
   <script src="src/config.js"></script>
