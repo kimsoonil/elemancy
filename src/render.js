@@ -119,11 +119,23 @@ function drawGame(ctx, game) {
   }
 }
 
+// 1번 카드: 현재 웨이브 표시 (다음 웨이브 버튼은 정적 HTML)
+function renderWaveInfo(game) {
+  const phaseLabel = game.phase === 'combat' ? '⚔️ 전투' : '🛠️ 준비';
+  return `<span class="wave-badge">웨이브 ${game.wave}<span class="slash">/${CONFIG.MAX_WAVE}</span></span><span class="phase">${phaseLabel}</span>`;
+}
+
+// 4번 카드: 골드 + 원소 선택권
+function renderResources(game) {
+  return `<div class="hud-row gold">🪙 <b>${Math.floor(game.gold)}</b><span class="muted">골드</span></div>` +
+    `<div class="hud-row">🎟️ <b>${game.bossTokens}</b><span class="muted">원소 선택권</span></div>`;
+}
+
+// #hud: 공허 침식 + 벤치 카드 (+ 승패 배너)
 function renderHud(game) {
   const w = game.boardWeight();
   const pct = Math.min(100, Math.round((w / CONFIG.GAME_OVER_CAP) * 100));
   const barColor = w > CONFIG.DANGER_THRESHOLD ? '#ff4d4d' : w > CONFIG.GAME_OVER_CAP * 0.5 ? '#ffd23c' : '#54e08a';
-  const phaseLabel = game.phase === 'combat' ? '⚔️ 전투' : '🛠️ 준비';
 
   const chips = Object.entries(game.bench).map(([id, n]) => {
     const e = ELEM[id];
@@ -133,14 +145,6 @@ function renderHud(game) {
   }).join('') || '<span class="muted">비어있음</span>';
 
   return `
-    <div class="sec">
-      <div class="hud-row">
-        <span class="wave-badge">웨이브 ${game.wave}<span class="slash">/${CONFIG.MAX_WAVE}</span></span>
-        <span class="phase">${phaseLabel}</span>
-      </div>
-      <div class="hud-row gold">🪙 <b>${Math.floor(game.gold)}</b><span class="muted">골드</span></div>
-      <div class="hud-row">🎟️ <b>${game.bossTokens}</b><span class="muted">원소 선택권</span></div>
-    </div>
     <div class="sec">
       <h4>🌀 공허 침식</h4>
       <div class="cap-top"><span class="muted">보드 위 몬스터</span><b>${w} / ${CONFIG.GAME_OVER_CAP}</b></div>
@@ -155,4 +159,8 @@ function renderHud(game) {
   `;
 }
 
-if (typeof window !== 'undefined') { window.drawGame = drawGame; window.renderHud = renderHud; window.TILE = TILE; }
+if (typeof window !== 'undefined') {
+  window.drawGame = drawGame; window.renderHud = renderHud;
+  window.renderWaveInfo = renderWaveInfo; window.renderResources = renderResources;
+  window.TILE = TILE;
+}

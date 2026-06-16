@@ -16,6 +16,8 @@ async function boot() {
   const canvas = document.getElementById('game');
   const ctx = canvas.getContext('2d');
   const hud = document.getElementById('hud');
+  const waveInfo = document.getElementById('waveInfo');
+  const resourceInfo = document.getElementById('resourceInfo');
   const combinePanel = document.getElementById('combinePanel');
   const upgradePanel = document.getElementById('upgradePanel');
   const gamblePanel = document.getElementById('gamblePanel');
@@ -147,6 +149,8 @@ async function boot() {
     last = t;
     game.update(dt);
     drawGame(ctx, game);
+    waveInfo.innerHTML = renderWaveInfo(game);
+    resourceInfo.innerHTML = renderResources(game);
     hud.innerHTML = renderHud(game);
     updateEconomy();
     renderTokens();

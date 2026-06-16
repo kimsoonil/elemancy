@@ -144,11 +144,16 @@
     <h1 class="title">ELEMANCY<small>원소 연금술 조합 디펜스</small></h1>
   </div>
   <div id="panel">
-    <div class="hud" id="hud"></div>
-    <div class="sec" id="actions">
-      <h4>⚔️ 전투</h4>
-      <button id="nextWave">다음 웨이브 ▶</button>
+    <div class="sec" id="waveCard">
+      <h4>🌊 현재 웨이브</h4>
+      <div class="hud-row" id="waveInfo"></div>
+      <button id="nextWave">다음 웨이브 시작 ▶</button>
       <div class="log" id="log"></div>
+    </div>
+    <div class="hud" id="hud"></div>
+    <div class="sec" id="resourceCard">
+      <h4>💰 자원</h4>
+      <div id="resourceInfo"></div>
     </div>
     <div class="sec">
       <h4>⬆️ 공격력 업그레이드 (레벨당 +1%)</h4>
