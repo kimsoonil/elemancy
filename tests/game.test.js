@@ -381,3 +381,18 @@ test('라운드당 약 30마리 스폰(0.5초 간격)', () => {
   assert.ok(normals >= 28 && normals <= 32, `normals=${normals}`); // ~30
   assert.equal(CONFIG.SPAWN_INTERVAL, 0.5);
 });
+
+test('난이도 — 시작 골드 반영', () => {
+  const g = new Game({ alchemy: new Alchemy(recipes), waveSystem: new WaveSystem(enemies), rng: seqRng([0]), startGold: 400 });
+  assert.equal(g.gold, 400);
+});
+
+test('난이도 방어도 — 적 체력 배수 적용', () => {
+  const mk = (armor) => {
+    const g = new Game({ alchemy: new Alchemy(recipes), waveSystem: new WaveSystem(enemies), rng: seqRng([0]), armorMult: armor });
+    g.path = [{ x: 0, y: 0 }, { x: 10, y: 0 }, { x: 10, y: 10 }, { x: 0, y: 10 }];
+    g.startWave();
+    return g.spawnQueue[0].hp;
+  };
+  assert.equal(mk(2), mk(1) * 2); // 어려움(2배)은 보통의 2배 체력
+});

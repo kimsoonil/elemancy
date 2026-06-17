@@ -102,6 +102,30 @@
     .recipe { background: rgba(255,255,255,0.04); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-size: 13px; }
     .recipe .res { font-weight: 700; }
     .recipe .ing { color: var(--muted); font-size: 12px; margin-top: 3px; }
+
+    /* 속도 배속 */
+    .speed { display: flex; gap: 4px; }
+    .speed .spd { width: auto; margin: 0; padding: 7px 11px; font-size: 13px; box-shadow: none;
+      background: rgba(123,140,255,0.14); border: 1px solid var(--line); }
+    .speed .spd.active { background: linear-gradient(135deg, var(--accent), var(--accent2)); }
+
+    /* 전체 화면 오버레이 (시작/난이도/결과) */
+    .screen { position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center;
+      background: radial-gradient(900px 600px at 50% 20%, rgba(40,30,90,0.6), transparent), rgba(4,4,12,0.94); }
+    .screen.hidden { display: none; }
+    .screen-card { text-align: center; padding: 40px 48px; border-radius: 20px;
+      background: var(--panel); border: 1px solid var(--line); box-shadow: 0 20px 80px rgba(0,0,0,0.6); }
+    .big-title { font-size: 44px; letter-spacing: 6px; margin: 0; text-shadow: 0 0 30px var(--accent2); }
+    .screen-card .sub { color: var(--muted); letter-spacing: 3px; margin: 6px 0 26px; }
+    .screen-card h2 { margin: 0 0 18px; font-size: 22px; }
+    .screen-card > button { width: auto; padding: 14px 40px; font-size: 18px; }
+    .diff-list { display: flex; gap: 14px; justify-content: center; }
+    .diff-btn { width: 170px; margin: 0; padding: 18px 14px; display: flex; flex-direction: column; gap: 6px;
+      background: rgba(123,140,255,0.14); border: 1px solid var(--line); box-shadow: none; }
+    .diff-btn:hover { background: rgba(123,140,255,0.28); }
+    .diff-btn .dn { font-size: 18px; font-weight: 800; }
+    .diff-btn .dd { font-size: 12px; color: var(--muted); font-weight: 500; line-height: 1.6; }
+    #resultBody { margin-bottom: 22px; font-size: 15px; line-height: 1.9; }
     /* renderHud가 만드는 섹션 div들을 패널 그리드의 직접 자식으로 승격 */
     #hud { display: contents; }
     .sec {
@@ -194,6 +218,11 @@
       <span class="pill"><b id="topRound">0</b> 라운드</span>
       <span class="timer">⏱ <b id="topTimer">30</b>초</span>
     </div>
+    <div class="speed" id="speedCtl">
+      <button class="spd active" data-spd="1">1x</button>
+      <button class="spd" data-spd="2">2x</button>
+      <button class="spd" data-spd="4">4x</button>
+    </div>
     <button id="recipeBtn" class="icon-btn">📜 조합식</button>
   </header>
   <div class="main">
@@ -252,6 +281,29 @@
       </div>
       <div id="recipeTabs" class="recipe-tabs"></div>
       <div id="recipeBody"></div>
+    </div>
+  </div>
+
+  <div id="startScreen" class="screen">
+    <div class="screen-card">
+      <h1 class="big-title">🌌 ELEMANCY</h1>
+      <div class="sub">우주 조합 디펜스</div>
+      <button id="startBtn">시작 ▶</button>
+    </div>
+  </div>
+
+  <div id="difficultyScreen" class="screen hidden">
+    <div class="screen-card">
+      <h2>난이도 선택</h2>
+      <div class="diff-list" id="difficultyBtns"></div>
+    </div>
+  </div>
+
+  <div id="resultScreen" class="screen hidden">
+    <div class="screen-card">
+      <h2 id="resultTitle"></h2>
+      <div id="resultBody" class="muted"></div>
+      <button id="restartBtn">다시하기 ↻</button>
     </div>
   </div>
 

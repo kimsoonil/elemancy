@@ -9,13 +9,10 @@ async function boot() {
   // 빌드 가능한 안쪽 칸(자동 배치 슬롯): 경로 안쪽 7×7
   const slots = [];
   for (let x = 2; x <= 8; x++) for (let y = 2; y <= 8; y++) slots.push({ x, y });
-  const game = new Game({ alchemy, waveSystem, slots });
 
-  // 정사각 순환 경로 (격자 단위)
-  game.path = [{ x: 1, y: 1 }, { x: 9, y: 1 }, { x: 9, y: 9 }, { x: 1, y: 9 }];
-
-  // 디버그/플레이테스트용
-  window.game = game;
+  let game = null;        // 난이도 선택 시 생성
+  let speed = 1;          // 게임 속도 배속
+  let resultShown = false;
 
   const canvas = document.getElementById('game');
   const ctx = canvas.getContext('2d');
@@ -293,13 +290,65 @@ async function boot() {
     }
   }
 
+  // ── 화면 전환(시작 → 난이도 → 게임 → 결과) ──
+  const startScreen = document.getElementById('startScreen');
+  const difficultyScreen = document.getElementById('difficultyScreen');
+  const resultScreen = document.getElementById('resultScreen');
+
+  function showOnly(el) {
+    [startScreen, difficultyScreen, resultScreen].forEach((s) => s.classList.toggle('hidden', s !== el));
+  }
+
+  // 난이도 버튼 생성
+  const diffBtns = document.getElementById('difficultyBtns');
+  for (const [key, d] of Object.entries(CONFIG.DIFFICULTY)) {
+    const b = document.createElement('button');
+    b.className = 'diff-btn';
+    b.innerHTML = `<span class="dn">${d.name}</span><span class="dd">시작 골드 ${d.gold}<br>적 방어도 ${d.armorLabel}</span>`;
+    b.onclick = () => startGame(key);
+    diffBtns.appendChild(b);
+  }
+
+  function startGame(diffKey) {
+    const d = CONFIG.DIFFICULTY[diffKey];
+    game = new Game({ alchemy, waveSystem, slots, startGold: d.gold, armorMult: d.armor });
+    game.path = [{ x: 1, y: 1 }, { x: 9, y: 1 }, { x: 9, y: 9 }, { x: 1, y: 9 }];
+    window.game = game;
+    speed = 1; setSpeed(1);
+    resultShown = false;
+    selSig = tokSig = questSig = null; // 패널 강제 갱신
+    showOnly(null); // 모든 오버레이 숨김
+  }
+
+  document.getElementById('startBtn').onclick = () => showOnly(difficultyScreen);
+  document.getElementById('restartBtn').onclick = () => { game = null; window.game = null; showOnly(startScreen); };
+
+  // ── 속도 배속 ──
+  const speedBtns = [...document.querySelectorAll('#speedCtl .spd')];
+  function setSpeed(s) {
+    speed = s;
+    speedBtns.forEach((b) => b.classList.toggle('active', Number(b.dataset.spd) === s));
+  }
+  speedBtns.forEach((b) => { b.onclick = () => setSpeed(Number(b.dataset.spd)); });
+
+  function showResult() {
+    resultShown = true;
+    document.getElementById('resultTitle').textContent = game.victory ? '🌌 승리!' : '💀 게임 오버';
+    document.getElementById('resultBody').innerHTML =
+      `도달 라운드: <b>${game.wave}</b> / ${CONFIG.MAX_WAVE}<br>` +
+      (game.victory ? '50웨이브를 모두 막아냈습니다!' : `보드가 공허로 가득 찼습니다 (${game.boardWeight()}/${CONFIG.GAME_OVER_CAP})`);
+    showOnly(resultScreen);
+  }
+
   let last = performance.now();
   function loop(t) {
     const dt = Math.min((t - last) / 1000, 0.05);
     last = t;
-    game.update(dt);
+    if (!game) { requestAnimationFrame(loop); return; } // 화면(시작/난이도/결과)에선 대기
+    if (!resultShown) game.update(dt * speed);
     fitCanvas();
     drawGame(ctx, game);
+    if (!resultShown && (game.gameOver || game.victory)) showResult();
     topRound.textContent = game.wave;
     topTimer.textContent = game.wave >= CONFIG.MAX_WAVE ? '—' : Math.max(0, Math.ceil(game.roundTimer));
     // 다음 웨이브 버튼: 라운드 시작 15초간 잠금

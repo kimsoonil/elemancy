@@ -4,14 +4,15 @@ var balance = (typeof require !== 'undefined') ? require('./balance.js') : globa
 var Combat = (typeof require !== 'undefined') ? require('./combat.js') : globalThis.combat;
 
 class Game {
-  constructor({ alchemy, waveSystem, rng = Math.random, slots = [] }) {
+  constructor({ alchemy, waveSystem, rng = Math.random, slots = [], startGold = CONFIG.START_GOLD, armorMult = 1 }) {
     this.alchemy = alchemy;
     this.waveSystem = waveSystem;
     this.rng = rng;
     this.slots = slots;         // 자동 배치 가능한 빌드 칸 [{x,y}, ...]
+    this.armorMult = armorMult; // 난이도 방어도(적 체력 배수)
     this.selectedUid = null;    // 클릭 선택된 타워
     this.moveMode = false;      // 이동 모드
-    this.gold = CONFIG.START_GOLD;
+    this.gold = startGold;
     this.wave = 0;
     this.phase = 'prep';        // 'prep' | 'combat'
     this.bench = {};            // {unitId: count} 미배치 소유분
@@ -262,11 +263,11 @@ class Game {
     for (const s of normals) {
       const n = Math.max(1, Math.round(s.count * scale));
       for (let i = 0; i < n; i++) {
-        queue.push({ id: s.id, role: s.role, hp: balance.enemyHP(s.role, this.wave) });
+        queue.push({ id: s.id, role: s.role, hp: Math.round(balance.enemyHP(s.role, this.wave) * this.armorMult) });
       }
     }
     for (const s of comp.spawns.filter((x) => x.role === 'boss')) {
-      queue.push({ id: s.id, role: s.role, hp: balance.enemyHP('boss', this.wave), bossIndex: this.wave / 10 });
+      queue.push({ id: s.id, role: s.role, hp: Math.round(balance.enemyHP('boss', this.wave) * this.armorMult), bossIndex: this.wave / 10 });
     }
     // 이번 웨이브 스폰을 기존 큐 뒤에 이어붙임(누적)
     this.spawnQueue.push(...queue);
@@ -305,7 +306,7 @@ class Game {
     this.questsDone += 1;
     this.questCooldownUntil = this.wave + CONFIG.QUEST_INTERVAL;
     const start = this.path.length ? this.path[0] : { x: 0, y: 0 };
-    const hp = Math.round(balance.baseHP(Math.max(1, this.wave)) * difficulty);
+    const hp = Math.round(balance.baseHP(Math.max(1, this.wave)) * difficulty * this.armorMult);
     this.enemies.push({
       uid: this.nextUid(), id: 'quest', role: 'quest', questReward: difficulty,
       hp, maxHp: hp, baseSpeed: 0.8, x: start.x, y: start.y, pathPos: 0, slowUntil: 0,

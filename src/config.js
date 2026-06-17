@@ -53,6 +53,13 @@ var CONFIG = {
 
   // 적 처치 골드(역할별; 보스는 GOLD_PER_BOSS로 별도 처리)
   GOLD_PER_KILL: { swarm: 5, fast: 8, special: 15, tank: 20 },
+
+  // 난이도: 시작 골드 + 적 방어도(체력 배수)
+  DIFFICULTY: {
+    easy:   { name: '쉬움',   gold: 800, armor: 0.5, armorLabel: '없음' },
+    normal: { name: '보통',   gold: 600, armor: 1,   armorLabel: '1배' },
+    hard:   { name: '어려움', gold: 400, armor: 2,   armorLabel: '2배' },
+  },
 };
 
 if (typeof module !== 'undefined' && module.exports) {
