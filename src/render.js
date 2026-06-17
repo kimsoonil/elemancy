@@ -124,6 +124,30 @@ function drawGame(ctx, game) {
     ctx.fillStyle = ratio > 0.5 ? '#54e08a' : ratio > 0.25 ? '#ffd23c' : '#ff4d4d';
     ctx.fillRect(cx - bw / 2, cy - r - 7, bw * ratio, 3);
   }
+
+  // 공격 모션: 타워→적 빔 + 착탄 플래시 (짧게 떴다 사라짐)
+  const FX_DUR = 0.18;
+  for (const fx of (game.effects || [])) {
+    const age = (game.now || 0) - fx.born;
+    if (age < 0 || age > FX_DUR) continue;
+    const k = age / FX_DUR;            // 0 → 1
+    const col = TYPE_COLOR[fx.type] || '#fff';
+    const x0 = fx.x0 * TILE, y0 = fx.y0 * TILE, x1 = fx.x1 * TILE, y1 = fx.y1 * TILE;
+    ctx.save();
+    ctx.globalAlpha = 1 - k;
+    ctx.strokeStyle = col; ctx.shadowColor = col; ctx.shadowBlur = 10;
+    ctx.lineWidth = fx.type === 'single' ? 4 : fx.type === 'aoe' ? 2.5 : 2;
+    // 발사체: 타워→적으로 빠르게 이동(앞부분)하며 빔 잔상
+    const head = Math.min(1, k * 2.2);
+    ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x0 + (x1 - x0) * head, y0 + (y1 - y0) * head); ctx.stroke();
+    // 착탄 플래시(헤드가 도달한 뒤)
+    if (head >= 1) {
+      ctx.fillStyle = col;
+      ctx.beginPath(); ctx.arc(x1, y1, (fx.type === 'aoe' ? 11 : 6) * (0.6 + k), 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.restore();
+  }
+  ctx.globalAlpha = 1;
 }
 
 // 1번 카드: 현재 웨이브 + 다음 웨이브까지 카운트다운

@@ -93,6 +93,8 @@ function tick(state, dt, now, onKill) {
     const targets = selectTargets(t, state.enemies);
     for (const e of targets) {
       resolveHit({ atkType: t.atkType, damage: t.damage * buff.dmgMult * scale }, e, now);
+      // 공격 모션용 이펙트 기록 (렌더가 짧게 그렸다 사라지게 함)
+      if (state.effects) state.effects.push({ type: t.atkType, x0: t.x, y0: t.y, x1: e.x, y1: e.y, born: now });
     }
   }
   // 3) 사망 처리

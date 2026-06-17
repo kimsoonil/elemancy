@@ -112,3 +112,14 @@ test('tick — 경로 미주입(빈 배열)이면 NaN 없이 안전 종료', () 
   assert.equal(Number.isNaN(enemies[0].pathPos), false);
   assert.equal(enemies[0].pathPos, 0);
 });
+
+test('tick — 타워 발사 시 공격 이펙트 기록(effects)', () => {
+  const Combat = require('../src/combat.js');
+  const path = [{ x: 0, y: 0 }, { x: 10, y: 0 }, { x: 10, y: 10 }, { x: 0, y: 10 }];
+  const enemies = [{ uid: 'e', role: 'swarm', hp: 100, maxHp: 100, baseSpeed: 0, pathPos: 0, x: 0, y: 0, slowUntil: 0 }];
+  const towers = [{ uid: 't', atkType: 'single', damage: 10, atkSpeed: 1, range: 3, x: 0, y: 0, cooldown: 0, tier: 1 }];
+  const effects = [];
+  Combat.tick({ towers, enemies, path, effects }, 1, 0, () => {});
+  assert.equal(effects.length, 1);
+  assert.equal(effects[0].type, 'single');
+});

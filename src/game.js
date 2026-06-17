@@ -17,6 +17,7 @@ class Game {
     this.bench = {};            // {unitId: count} 미배치 소유분
     this.towers = [];           // 배치된 타워 인스턴스
     this.enemies = [];
+    this.effects = [];          // 공격 모션 이펙트 (렌더용, 짧게 유지)
     this.upgrades = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
     this.bossTokens = 0;        // 원소 선택권
     this.gameOver = false;
@@ -267,9 +268,11 @@ class Game {
     }
     this._spawnTick(dt);
     Combat.tick(
-      { towers: this.towers, enemies: this.enemies, path: this.path, dmgScale: (t) => this.damageMultiplier(t.tier) },
+      { towers: this.towers, enemies: this.enemies, path: this.path, effects: this.effects, dmgScale: (t) => this.damageMultiplier(t.tier) },
       dt, this.now, (e) => this._onKill(e)
     );
+    // 오래된 공격 이펙트 정리 (0.18초)
+    this.effects = this.effects.filter((fx) => this.now - fx.born < 0.18);
     this.checkGameOver();
     // 승리: 마지막 웨이브까지 모두 스폰되고 전멸시키면 클리어
     if (this.wave >= CONFIG.MAX_WAVE && this.spawnQueue.length === 0 && this.enemies.length === 0) {
