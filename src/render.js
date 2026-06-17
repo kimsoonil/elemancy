@@ -4,6 +4,16 @@ const TILE = 64; // 1 격자 단위 = 64px
 const TYPE_COLOR = { aoe: '#ff6a3d', single: '#7b8cff', slow: '#3fd7ff', buff: '#5cf08a' };
 const TYPE_ICON = { aoe: '💥', single: '🎯', slow: '❄️', buff: '✨' };
 
+// 적 역할별 스타일 (색·크기·표식)
+const ROLE_STYLE = {
+  swarm:   { r: 6,  c: '#ff6b6b', dark: '#7a0f2a', mark: '' },   // 물량: 작고 많음
+  fast:    { r: 7,  c: '#ffe14d', dark: '#7a5a0f', mark: '»' },  // 고속: 노랑
+  tank:    { r: 13, c: '#d2603a', dark: '#5a1d10', mark: '▣' },  // 탱커: 크고 단단(이중 테두리)
+  special: { r: 9,  c: '#b06bff', dark: '#3a1080', mark: '✦' },  // 특수: 보라 오라
+  boss:    { r: 16, c: '#d24bff', dark: '#5a1080', mark: '☠' },  // 보스
+  quest:   { r: 11, c: '#5cf08a', dark: '#0f5a2a', mark: '?' },  // 퀘스트 몬스터
+};
+
 // 원소별 색·아이콘 (tier1 / 벤치 칩 표시용)
 const ELEM = {
   water:    { c: '#3aa0ff', i: '💧' },
@@ -68,13 +78,31 @@ function drawGame(ctx, game) {
     ctx.shadowBlur = 0;
   }
 
+  // 선택된 타워의 사거리(+버프 타워는 버프 범위) 표시
+  const selTower = game.towers.find((t) => t.uid === game.selectedUid);
+  if (selTower) {
+    const cx = selTower.x * TILE, cy = selTower.y * TILE;
+    const col = TYPE_COLOR[selTower.atkType] || '#fff';
+    ctx.save();
+    if (selTower.atkType === 'buff' && CONFIG.BUFF_RADIUS) {
+      // 버프 범위(초록)
+      ctx.fillStyle = 'rgba(92,240,138,0.10)'; ctx.strokeStyle = 'rgba(92,240,138,0.6)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(cx, cy, CONFIG.BUFF_RADIUS * TILE, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    } else {
+      // 공격 사거리
+      ctx.fillStyle = 'rgba(255,255,255,0.07)';
+      ctx.strokeStyle = col; ctx.globalAlpha = 0.55; ctx.lineWidth = 1.5; ctx.setLineDash([6, 6]);
+      ctx.beginPath(); ctx.arc(cx, cy, selTower.range * TILE, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.setLineDash([]);
+    }
+    ctx.restore();
+  }
+
   // 타워
   for (const t of game.towers) {
     const cx = t.x * TILE, cy = t.y * TILE;
     const col = TYPE_COLOR[t.atkType] || '#fff';
-    // 사거리 링 (은은하게)
-    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
-    ctx.beginPath(); ctx.arc(cx, cy, t.range * TILE, 0, Math.PI * 2); ctx.stroke();
     // 본체 글로우
     ctx.save();
     ctx.shadowColor = col; ctx.shadowBlur = 16;
@@ -102,23 +130,38 @@ function drawGame(ctx, game) {
     ctx.fillText('T' + t.tier, cx, cy + 11);
   }
 
-  // 적 (공허/엔트로피 — 보라/마젠타 글로우 + 체력바)
+  // 적 — 역할별 색·크기·표식으로 구분
   const pulse = 0.5 + 0.5 * Math.sin((game.now || 0) * 4);
   for (const e of game.enemies) {
     const cx = e.x * TILE, cy = e.y * TILE;
-    const isBoss = e.role === 'boss';
-    const r = isBoss ? 15 + pulse * 3 : 8;
-    const col = isBoss ? '#d24bff' : '#ff4d6d';
+    const st = ROLE_STYLE[e.role] || ROLE_STYLE.swarm;
+    const big = e.role === 'boss' || e.role === 'special';
+    const r = st.r + (big ? pulse * 2 : 0);
     ctx.save();
-    ctx.shadowColor = col; ctx.shadowBlur = isBoss ? 22 : 10;
+    ctx.shadowColor = st.c; ctx.shadowBlur = e.role === 'boss' ? 22 : 10;
     const g = ctx.createRadialGradient(cx, cy, 1, cx, cy, r);
-    g.addColorStop(0, '#fff'); g.addColorStop(0.4, col); g.addColorStop(1, isBoss ? '#5a1080' : '#7a0f2a');
+    g.addColorStop(0, '#fff'); g.addColorStop(0.4, st.c); g.addColorStop(1, st.dark);
     ctx.fillStyle = g;
     ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
+    // tank: 장갑 이중 테두리 / special·quest: 점선 오라
+    if (e.role === 'tank') {
+      ctx.strokeStyle = 'rgba(255,255,255,0.7)'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(cx, cy, r + 3, 0, Math.PI * 2); ctx.stroke();
+    } else if (e.role === 'special' || e.role === 'quest') {
+      ctx.strokeStyle = st.c; ctx.globalAlpha = 0.6; ctx.setLineDash([3, 3]);
+      ctx.beginPath(); ctx.arc(cx, cy, r + 4 + pulse * 2, 0, Math.PI * 2); ctx.stroke();
+      ctx.setLineDash([]); ctx.globalAlpha = 1;
+    }
+    // 역할 표식
+    if (st.mark) {
+      ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.font = `${e.role === 'boss' ? 14 : 10}px sans-serif`;
+      ctx.fillText(st.mark, cx, cy + 0.5);
+    }
     // 체력바
     const ratio = Math.max(0, e.hp / e.maxHp);
-    const bw = isBoss ? 34 : 18;
+    const bw = Math.max(18, r * 2.2);
     ctx.fillStyle = 'rgba(0,0,0,0.55)';
     ctx.fillRect(cx - bw / 2, cy - r - 7, bw, 3);
     ctx.fillStyle = ratio > 0.5 ? '#54e08a' : ratio > 0.25 ? '#ffd23c' : '#ff4d4d';
