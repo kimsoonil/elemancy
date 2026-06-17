@@ -65,7 +65,7 @@
     { "id": "spacerock",   "name": "우주암석", "tier": 5, "inputs": ["eruption", "peat"] },
     { "id": "spaceice",    "name": "우주얼음", "tier": 5, "inputs": ["blizzard", "iceage"] },
 
-    { "id": "wholecore", "name": "전체핵", "tier": 6, "inputs": ["water", "fire", "wind", "earth", "electric", "wood", "ice", "metal"] },
+    { "id": "wholecore", "name": "전체핵", "tier": 6, "statTier": 3, "inputs": ["water", "fire", "wind", "earth", "electric", "wood", "ice", "metal"] },
 
     { "id": "mercury", "name": "수성",   "tier": 6, "inputs": ["wholecore", "meteor", "spacerock"] },
     { "id": "venus",   "name": "금성",   "tier": 6, "inputs": ["wholecore", "gasgiant", "spacerock"] },

@@ -15,7 +15,7 @@ function dominantElement(alchemy, id) {
 /** 유닛 → {element, atkType, damageBand, atkSpeed, range, tier} */
 function deriveStats(alchemy, id) {
   const unit = alchemy.get(id);
-  const tier = unit.tier;
+  const tier = unit.statTier || unit.tier; // 전투 능력치 기준 단계(statTier로 별도 지정 가능)
   const el = dominantElement(alchemy, id);
   const atkType = unit.atkType || CONFIG.ATK_TYPE[el]; // 레시피 오버라이드 우선
   const isBuff = atkType === 'buff';

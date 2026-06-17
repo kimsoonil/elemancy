@@ -49,3 +49,10 @@ test('rollDamage — 밴드 내 정수 반환', () => {
   const mid = Stats.rollDamage([10, 20], 0.5);
   assert.ok(mid >= 10 && mid <= 20);
 });
+
+test('deriveStats — 전체핵은 statTier로 3단계급 능력치', () => {
+  const s = Stats.deriveStats(a, 'wholecore');
+  assert.equal(s.tier, 3);                  // 전투 단계 = 3
+  // 지배 원소 물(둔화) 기준 3단계 밴드 = [10,15]×100
+  assert.deepEqual(s.damageBand, [1000, 1500]);
+});
