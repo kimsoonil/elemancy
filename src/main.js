@@ -81,7 +81,8 @@ async function boot() {
   document.getElementById('recipeClose').onclick = () => recipeModal.classList.add('hidden');
   recipeModal.onclick = (e) => { if (e.target === recipeModal) recipeModal.classList.add('hidden'); };
 
-  document.getElementById('nextWave').onclick = () => game.startWave();
+  const nextWaveBtn = document.getElementById('nextWave');
+  nextWaveBtn.onclick = () => game.manualStartWave();
 
   // 랜덤 유닛 뽑기
   const drawBtn = document.getElementById('drawBtn');
@@ -301,6 +302,14 @@ async function boot() {
     drawGame(ctx, game);
     topRound.textContent = game.wave;
     topTimer.textContent = game.wave >= CONFIG.MAX_WAVE ? '—' : Math.max(0, Math.ceil(game.roundTimer));
+    // 다음 웨이브 버튼: 라운드 시작 15초간 잠금
+    const canNext = game.canStartNextWave();
+    nextWaveBtn.disabled = !canNext;
+    if (canNext) nextWaveBtn.textContent = '다음 웨이브 시작 ▶';
+    else {
+      const lock = Math.max(0, Math.ceil(CONFIG.NEXT_WAVE_LOCK - (CONFIG.ROUND_TIME - game.roundTimer)));
+      nextWaveBtn.textContent = `다음 웨이브 (${lock}초 후)`;
+    }
     waveInfo.innerHTML = renderWaveInfo(game);
     resourceInfo.innerHTML = renderResources(game);
     hud.innerHTML = renderHud(game);

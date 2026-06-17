@@ -21,7 +21,8 @@ test('고밴드/고속 원소 집합', () => {
 test('게임오버 캡 / 보스 가중치 / 스폰 수', () => {
   assert.equal(CONFIG.GAME_OVER_CAP, 100);
   assert.equal(CONFIG.BOSS_CAP_WEIGHT, 8);
-  assert.equal(CONFIG.SPAWN_PER_ROUND, 20);
+  assert.equal(CONFIG.SPAWN_PER_ROUND, 30);
+  assert.equal(CONFIG.SPAWN_INTERVAL, 0.5);
 });
 
 test('업그레이드 비용은 초기 저렴하고 레벨에 따라 증가', () => {

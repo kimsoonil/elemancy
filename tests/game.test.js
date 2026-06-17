@@ -362,3 +362,22 @@ test('퀘스트 몬스터 처치 시 난이도 수만큼 선택권', () => {
   g._onKill({ role: 'quest', questReward: 3 });
   assert.equal(g.bossTokens, 3);
 });
+
+test('다음 웨이브 버튼 — 라운드 시작 15초간 잠금', () => {
+  const g = newGame(seqRng([0]));
+  g.startWave();                              // roundTimer = 30
+  assert.equal(g.canStartNextWave(), false);  // 0초 경과
+  g.roundTimer = 16;                          // 14초 경과
+  assert.equal(g.canStartNextWave(), false);
+  g.roundTimer = 15;                          // 15초 경과
+  assert.equal(g.canStartNextWave(), true);
+  assert.equal(g.manualStartWave(), true);    // 이제 수동 시작 가능
+});
+
+test('라운드당 약 30마리 스폰(0.5초 간격)', () => {
+  const g = newGame(seqRng([0]));
+  g.startWave();
+  const normals = g.spawnQueue.filter((s) => s.role !== 'boss').length;
+  assert.ok(normals >= 28 && normals <= 32, `normals=${normals}`); // ~30
+  assert.equal(CONFIG.SPAWN_INTERVAL, 0.5);
+});

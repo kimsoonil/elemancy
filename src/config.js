@@ -24,11 +24,13 @@ var CONFIG = {
   ROLE_HP_MULT: { swarm: 0.3, fast: 0.5, special: 1.2, tank: 2.5 },
   BOSS_HP_MULT: 3,        // 구간 끝 base × 3
   BOSS_CAP_WEIGHT: 8,
-  SPAWN_PER_ROUND: 20,
+  SPAWN_PER_ROUND: 30,   // 라운드당 스폰 수 (0.5초 간격 → 15초간 출현)
+  SPAWN_INTERVAL: 0.5,   // 유닛 스폰 간격(초)
   GAME_OVER_CAP: 100,
   DANGER_THRESHOLD: 80, // 위기 게이지 경고 표시 기준
   MAX_WAVE: 50,
   ROUND_TIME: 30,       // 한 라운드(웨이브 간격) 초 — 지나면 자동으로 다음 웨이브
+  NEXT_WAVE_LOCK: 15,   // 라운드 시작 후 이 시간 동안 '다음 웨이브' 버튼 비활성(스폰 구간)
   GOLD_PER_ROUND: 200,  // 라운드 시작 시 정액 지급
   GOLD_PER_BOSS: 1000,  // 보스 처치 골드 = 보스인덱스 × 1000 (1000~5000)
   QUEST_INTERVAL: 8,    // 퀘스트 진행 간격(라운드) — 1회 후 다음까지 잠금

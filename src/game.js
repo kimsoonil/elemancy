@@ -233,6 +233,19 @@ class Game {
     if (this.boardWeight() > CONFIG.GAME_OVER_CAP) this.gameOver = true;
   }
 
+  /** 수동 '다음 웨이브' 가능 여부: 라운드 시작 후 NEXT_WAVE_LOCK초 경과해야 함. */
+  canStartNextWave() {
+    if (this.gameOver || this.victory || this.wave >= CONFIG.MAX_WAVE) return false;
+    return (CONFIG.ROUND_TIME - this.roundTimer) >= CONFIG.NEXT_WAVE_LOCK;
+  }
+
+  /** 버튼용 수동 시작(잠금 시간 전엔 무시). */
+  manualStartWave() {
+    if (!this.canStartNextWave()) return false;
+    this.startWave();
+    return true;
+  }
+
   /** 다음 웨이브 시작: 적 구성 → 스폰 큐 적재, 타이머 리셋. 웨이브는 누적된다. */
   startWave() {
     if (this.gameOver || this.victory || this.wave >= CONFIG.MAX_WAVE) return;
@@ -264,7 +277,7 @@ class Game {
     if (this.spawnQueue.length === 0) return;
     this.spawnTimer -= dt;
     if (this.spawnTimer > 0) return;
-    this.spawnTimer = 0.4;
+    this.spawnTimer = CONFIG.SPAWN_INTERVAL;
     const s = this.spawnQueue.shift();
     const start = this.path.length ? this.path[0] : { x: 0, y: 0 };
     this.enemies.push({
