@@ -173,7 +173,7 @@
     .btn-row .mini { flex: 1 1 auto; justify-content: center; }
     /* 조합 옵션: 결과명 + 작은 조합식 */
     .combo { flex-direction: column; align-items: flex-start; gap: 2px; }
-    .combo .combo-name { font-weight: 600; }
+    .combo .combo-name { font-weight: 600; display: flex; justify-content: space-between; width: 100%; gap: 8px; }
     .combo .combo-recipe { font-size: 11px; color: var(--muted); }
     .log {
       margin-top: 6px; font-size: 12px; min-height: 16px; color: var(--muted);
@@ -232,8 +232,12 @@
       <h4>🎰 원소 가챠</h4>
       <div id="gachaPanel" class="btn-col"></div>
     </div>
+    <div class="sec" id="questCard">
+      <h4>🧭 퀘스트 (8라운드마다 · 선택권 획득)</h4>
+      <div id="questPanel"></div>
+    </div>
     <div class="sec" id="tokenCard">
-      <h4>🎟️ 원소 선택권 (보스 처치 보상)</h4>
+      <h4>🎟️ 원소 선택권 (보스·퀘스트로 획득)</h4>
       <div id="tokenPanel"></div>
     </div>
   </div>

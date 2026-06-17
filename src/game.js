@@ -23,6 +23,8 @@ class Game {
     this.gameOver = false;
     this.victory = false;
     this.finalBuilt = false;    // 7단계(최종) 게임당 1회 제작 여부
+    this.questsDone = 0;        // 진행한 퀘스트 수(난이도 해제 기준)
+    this.questCooldownUntil = 0;// 이 웨이브 전까지 퀘스트 잠금
     this._uid = 0;
     this._tier1 = alchemy.byTier(1).map((u) => u.id);
     this.path = [];        // main에서 주입
@@ -111,34 +113,57 @@ class Game {
     return true;
   }
 
-  /** resultId 합성: 소유(벤치+보드)에서 재료 소모, 결과는 벤치로. */
-  combine(resultId) {
+  /** 레시피별 필요 재료 수 {id: count} */
+  _recipeNeed(resultId) {
     const unit = this.alchemy.get(resultId);
-    if (!unit || !unit.inputs) return false;
-    if (unit.tier === 7 && this.finalBuilt) return false; // 최종 진화는 게임당 1회
+    if (!unit || !unit.inputs) return null;
     const need = {};
     for (const id of unit.inputs) need[id] = (need[id] || 0) + 1;
+    return need;
+  }
+
+  /**
+   * 조합에 필요한 원소 선택권 수 = 부족한 재료 개수(보유분으로 못 채우는 만큼).
+   * 재료가 다 있으면 0(무료). 레시피가 아니면 null.
+   */
+  combineCost(resultId) {
+    const need = this._recipeNeed(resultId);
+    if (!need) return null;
     const owned = this.ownedCounts();
+    let missing = 0;
+    for (const [id, cnt] of Object.entries(need)) missing += Math.max(0, cnt - (owned[id] || 0));
+    return missing;
+  }
+
+  /**
+   * resultId 합성: 보유 재료를 소모하고, 부족분은 원소 선택권으로 메워 조합.
+   * 결과물은 자동 배치. 토큰 부족/최종 1회 초과면 false.
+   */
+  combine(resultId) {
+    const unit = this.alchemy.get(resultId);
+    const need = this._recipeNeed(resultId);
+    if (!need) return false;
+    if (unit.tier === 7 && this.finalBuilt) return false; // 최종 진화는 게임당 1회
+    const missing = this.combineCost(resultId);
+    if (this.bossTokens < missing) return false;            // 부족분 메울 선택권 부족
+    // 보유분만 실제 소모(부족분은 토큰으로 대체)
     for (const [id, cnt] of Object.entries(need)) {
-      if ((owned[id] || 0) < cnt) return false;
-    }
-    // 소모: 벤치 우선, 부족분은 보드 타워에서 제거
-    for (const [id, cnt] of Object.entries(need)) {
-      let remaining = cnt;
-      const fromBench = Math.min(remaining, this.bench[id] || 0);
+      let take = Math.min(cnt, this.ownedCounts()[id] || 0);
+      const fromBench = Math.min(take, this.bench[id] || 0);
       if (fromBench > 0) {
         this.bench[id] -= fromBench;
         if (this.bench[id] <= 0) delete this.bench[id];
-        remaining -= fromBench;
+        take -= fromBench;
       }
-      while (remaining > 0) {
+      while (take > 0) {
         const idx = this.towers.findIndex((t) => t.unitId === id);
         if (this.towers[idx] && this.towers[idx].uid === this.selectedUid) this.selectedUid = null;
         this.towers.splice(idx, 1);
-        remaining -= 1;
+        take -= 1;
       }
     }
-    this.autoPlace(resultId); // 결과물 자동 배치
+    this.bossTokens -= missing; // 부족분만큼 선택권 차감
+    this.autoPlace(resultId);
     if (unit.tier === 7) this.finalBuilt = true;
     return true;
   }
@@ -252,7 +277,34 @@ class Game {
   }
 
   /** 전투 중 적 사망 시: 골드 지급, 보스면 원소 선택권(+3·4구간 보스는 전체핵) 지급. */
+  /** 현재 선택 가능한 최대 퀘스트 난이도(처음 1 → 퀘스트마다 +1, 최대 4). */
+  questMaxDifficulty() { return Math.min(4, this.questsDone + 1); }
+
+  /** 퀘스트 진행 가능 여부(쿨다운 경과 + 게임 진행 중). */
+  questAvailable() {
+    return !this.gameOver && !this.victory && this.wave >= this.questCooldownUntil;
+  }
+
+  /** 퀘스트 시작: 난이도(1~4) 몬스터를 소환. 처치 시 난이도 수만큼 선택권 지급. */
+  startQuest(difficulty) {
+    if (!this.questAvailable()) return false;
+    if (difficulty < 1 || difficulty > this.questMaxDifficulty()) return false;
+    this.questsDone += 1;
+    this.questCooldownUntil = this.wave + CONFIG.QUEST_INTERVAL;
+    const start = this.path.length ? this.path[0] : { x: 0, y: 0 };
+    const hp = Math.round(balance.baseHP(Math.max(1, this.wave)) * difficulty);
+    this.enemies.push({
+      uid: this.nextUid(), id: 'quest', role: 'quest', questReward: difficulty,
+      hp, maxHp: hp, baseSpeed: 0.8, x: start.x, y: start.y, pathPos: 0, slowUntil: 0,
+    });
+    return true;
+  }
+
   _onKill(enemy) {
+    if (enemy.role === 'quest') {
+      this.bossTokens += enemy.questReward || 1; // 퀘스트 보상: 난이도 수만큼 선택권
+      return;
+    }
     if (enemy.role === 'boss') {
       const idx = enemy.bossIndex || 1;
       this.gold += idx * CONFIG.GOLD_PER_BOSS;          // 1000,2000,3000,4000,5000

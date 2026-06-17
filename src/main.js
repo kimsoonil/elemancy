@@ -27,6 +27,7 @@ async function boot() {
   const gamblePanel = document.getElementById('gamblePanel');
   const gachaPanel = document.getElementById('gachaPanel');
   const tokenPanel = document.getElementById('tokenPanel');
+  const questPanel = document.getElementById('questPanel');
   const logEl = document.getElementById('log');
   const topRound = document.getElementById('topRound');
   const topTimer = document.getElementById('topTimer');
@@ -199,17 +200,47 @@ async function boot() {
     tokenPanel.appendChild(row);
   }
 
+  let questSig = null;
+  function renderQuest() {
+    const avail = game.questAvailable();
+    const maxD = game.questMaxDifficulty();
+    const cd = Math.max(0, game.questCooldownUntil - game.wave);
+    const sig = `${avail}|${maxD}|${cd}`;
+    if (sig === questSig) return;
+    questSig = sig;
+    questPanel.innerHTML = '';
+    if (!avail) {
+      questPanel.innerHTML = `<span class="muted">다음 퀘스트까지 ${cd}라운드</span>`;
+      return;
+    }
+    const hint = document.createElement('div');
+    hint.className = 'muted'; hint.style.marginBottom = '6px';
+    hint.textContent = '난이도 선택 → 퀘스트 몬스터 처치 시 선택권 지급';
+    questPanel.appendChild(hint);
+    const row = document.createElement('div');
+    row.className = 'btn-row';
+    for (let d = 1; d <= 4; d++) {
+      const b = document.createElement('button');
+      b.className = 'mini';
+      b.disabled = d > maxD;
+      b.innerHTML = `<span>난이도 ${d}</span><span class="cost">🎟️ ${d}</span>`;
+      b.onclick = () => { if (game.startQuest(d)) flash(`퀘스트 ${d}단계 몬스터 소환! 처치 시 선택권 ${d}개`, 'good'); };
+      row.appendChild(b);
+    }
+    questPanel.appendChild(row);
+  }
+
   let selSig = null;
   function renderSelected() {
     const sel = game.towers.find((t) => t.uid === game.selectedUid);
-    // 이 유닛이 재료로 들어가는 모든 상위 조합(현재 제작 가능 여부와 무관하게 전부)
-    const craftable = sel ? new Set(game.alchemy.craftable(game.ownedCounts())) : new Set();
+    // 이 유닛이 재료로 들어가는 모든 상위 조합(부족분은 원소 선택권으로 메움)
     const allUses = sel
       ? game.alchemy.usages(sel.unitId).slice().sort((a, b) => game.alchemy.get(a).tier - game.alchemy.get(b).tier)
       : [];
+    const costs = allUses.map((id) => game.combineCost(id));
     // 변경이 없으면 다시 그리지 않음(매 프레임 재생성 시 버튼 클릭이 씹힘)
-    const sig = `${sel ? sel.uid : ''}|${sel ? sel.unitId : ''}|${game.moveMode}|${game.finalBuilt}|` +
-      allUses.map((id) => id + (craftable.has(id) ? '1' : '0')).join(',');
+    const sig = `${sel ? sel.uid : ''}|${sel ? sel.unitId : ''}|${game.moveMode}|${game.finalBuilt}|${game.bossTokens}|` +
+      allUses.map((id, i) => id + ':' + costs[i]).join(',');
     if (sig === selSig) return;
     selSig = sig;
 
@@ -235,20 +266,23 @@ async function boot() {
     if (allUses.length) {
       const col = document.createElement('div');
       col.className = 'btn-col';
-      for (const id of allUses) {
+      allUses.forEach((id, i) => {
         const u = game.alchemy.get(id);
+        const cost = costs[i]; // 부족분 = 필요한 원소 선택권
         const finalLocked = u.tier === 7 && game.finalBuilt; // 최종 1회 소진
-        const can = craftable.has(id) && !finalLocked;
+        const can = game.bossTokens >= cost && !finalLocked;
         const ing = u.inputs.map((x) => alchemy.name(x)).join(' + ');
+        const costTag = finalLocked ? '✅ 최종 완료' : cost === 0 ? '무료' : `🎟️ ${cost}`;
         const b = document.createElement('button');
         b.className = 'mini combo';
         b.disabled = !can;
-        const mark = finalLocked ? ' ✅(최종 완료)' : can ? '' : ' 🔒';
-        b.innerHTML = `<span class="combo-name">${alchemy.name(id)}${mark}</span>` +
+        b.innerHTML = `<span class="combo-name">${alchemy.name(id)}<span class="cost">${costTag}</span></span>` +
           `<span class="combo-recipe">${ing}</span>`;
-        b.onclick = () => { if (game.combine(id)) flash(`조합 완성: ${alchemy.name(id)}`, 'good'); };
+        b.onclick = () => {
+          if (game.combine(id)) flash(`조합 완성: ${alchemy.name(id)}` + (cost ? ` (선택권 ${cost} 사용)` : ''), 'good');
+        };
         col.appendChild(b);
-      }
+      });
       selectedPanel.appendChild(col);
     } else {
       const m = document.createElement('div');
@@ -272,6 +306,7 @@ async function boot() {
     hud.innerHTML = renderHud(game);
     updateEconomy();
     renderTokens();
+    renderQuest();
     renderSelected();
     requestAnimationFrame(loop);
   }
