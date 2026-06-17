@@ -12,6 +12,7 @@ async function boot() {
 
   let game = null;        // 난이도 선택 시 생성
   let speed = 1;          // 게임 속도 배속
+  let paused = false;     // 일시정지
   let resultShown = false;
 
   const canvas = document.getElementById('game');
@@ -315,6 +316,7 @@ async function boot() {
     game.path = [{ x: 1, y: 1 }, { x: 9, y: 1 }, { x: 9, y: 9 }, { x: 1, y: 9 }];
     window.game = game;
     speed = 1; setSpeed(1);
+    setPaused(false);
     resultShown = false;
     selSig = tokSig = questSig = null; // 패널 강제 갱신
     showOnly(null); // 모든 오버레이 숨김
@@ -331,6 +333,19 @@ async function boot() {
   }
   speedBtns.forEach((b) => { b.onclick = () => setSpeed(Number(b.dataset.spd)); });
 
+  // ── 일시정지 ──
+  const pauseBtn = document.getElementById('pauseBtn');
+  function setPaused(p) {
+    paused = p;
+    pauseBtn.textContent = paused ? '▶' : '⏸';
+    pauseBtn.classList.toggle('active', paused);
+  }
+  function togglePause() { if (game && !resultShown) setPaused(!paused); }
+  pauseBtn.onclick = togglePause;
+  window.addEventListener('keydown', (e) => {
+    if (e.code === 'Space') { e.preventDefault(); togglePause(); }
+  });
+
   function showResult() {
     resultShown = true;
     document.getElementById('resultTitle').textContent = game.victory ? '🌌 승리!' : '💀 게임 오버';
@@ -345,7 +360,7 @@ async function boot() {
     const dt = Math.min((t - last) / 1000, 0.05);
     last = t;
     if (!game) { requestAnimationFrame(loop); return; } // 화면(시작/난이도/결과)에선 대기
-    if (!resultShown) game.update(dt * speed);
+    if (!resultShown && !paused) game.update(dt * speed);
     fitCanvas();
     drawGame(ctx, game);
     if (!resultShown && (game.gameOver || game.victory)) showResult();
