@@ -200,21 +200,23 @@ test('웨이브 2부터 시작 시 tier1 원소 2개 라운드 보상', () => {
   assert.equal(after2 - after1, CONFIG.WAVE_CLEAR_ELEMENTS);
 });
 
-test('보스 처치 시 원소 선택권 지급 (보스 인덱스별 ×3)', () => {
+test('보스 처치 시 원소 선택권 3·6·9·12·15 + 3·4구간 전체핵', () => {
   const g = newGame(seqRng([0]));
+  g.bench = {}; g.towers = []; g.slots = [];
   g.bossTokens = 0;
-  g._onKill({ role: 'boss', bossIndex: 1 }); // w10
-  assert.equal(g.bossTokens, 1);
-  g._onKill({ role: 'boss', bossIndex: 2 }); // w20
-  assert.equal(g.bossTokens, 1 + 3);
-  g._onKill({ role: 'boss', bossIndex: 4 }); // w40
-  assert.equal(g.bossTokens, 1 + 3 + 27);
+  g._onKill({ role: 'boss', bossIndex: 1 }); assert.equal(g.bossTokens, 3);   // w10
+  g._onKill({ role: 'boss', bossIndex: 2 }); assert.equal(g.bossTokens, 9);   // +6
+  g._onKill({ role: 'boss', bossIndex: 5 }); assert.equal(g.bossTokens, 24);  // +15
+  // 3·4구간 보스는 전체핵 1개씩 지급
+  g._onKill({ role: 'boss', bossIndex: 3 });
+  g._onKill({ role: 'boss', bossIndex: 4 });
+  assert.equal(g.ownedCounts().wholecore, 2);
 });
 
-test('마지막 웨이브 후 전멸하면 승리', () => {
+test('마지막 웨이브(50) 후 전멸하면 승리', () => {
   const g = newGame(seqRng([0]));
   g.path = [{ x: 0, y: 0 }, { x: 10, y: 0 }, { x: 10, y: 10 }, { x: 0, y: 10 }];
-  g.wave = 40; g.spawnQueue = []; g.enemies = [];
+  g.wave = CONFIG.MAX_WAVE; g.spawnQueue = []; g.enemies = [];
   g.update(0.1);
   assert.equal(g.victory, true);
 });

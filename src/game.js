@@ -252,11 +252,13 @@ class Game {
     });
   }
 
-  /** 전투 중 적 사망 시: 골드 지급, 보스면 원소 선택권 지급. */
+  /** 전투 중 적 사망 시: 골드 지급, 보스면 원소 선택권(+3·4구간 보스는 전체핵) 지급. */
   _onKill(enemy) {
     this.gold += CONFIG.GOLD_PER_KILL[enemy.role] || 5;
     if (enemy.role === 'boss') {
-      this.bossTokens += CONFIG.BOSS_TOKEN_BASE * Math.pow(3, (enemy.bossIndex || 1) - 1);
+      const idx = enemy.bossIndex || 1;
+      this.bossTokens += CONFIG.BOSS_TOKEN_STEP * idx; // 3,6,9,12,15
+      if (idx === 3 || idx === 4) this.autoPlace('wholecore'); // 3·4구간 보스: 전체핵 1개
     }
   }
 

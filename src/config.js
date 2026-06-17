@@ -27,14 +27,14 @@ var CONFIG = {
   SPAWN_PER_ROUND: 20,
   GAME_OVER_CAP: 100,
   DANGER_THRESHOLD: 80, // 위기 게이지 경고 표시 기준
-  MAX_WAVE: 40,
+  MAX_WAVE: 50,
   ROUND_TIME: 30, // 한 라운드(웨이브 간격) 초 — 지나면 자동으로 다음 웨이브
 
   // 경제
   START_GOLD: 600,       // 시작 골드 (랜덤 뽑기 100G로 시작 유닛 구성)
   START_ELEMENTS: 0,     // 시작 무료 유닛 (골드로 뽑아 시작)
   WAVE_CLEAR_ELEMENTS: 2,
-  BOSS_TOKEN_BASE: 1,     // 보스마다 ×3 (1,3,9,27)
+  BOSS_TOKEN_STEP: 3,     // 보스 인덱스 × 3 → 3,6,9,12,15
   UPGRADE_PER_LEVEL: 0.01, // 레벨당 +1%
   UPGRADE_MAX_LEVEL: 1000,
   UPGRADE_COST: (tier, level) => Math.ceil(tier * 20 * Math.pow(1.01, level)),

@@ -1,9 +1,9 @@
 {
   "meta": {
     "title": "원소 연금술 조합 디펜스 - 적 & 웨이브 데이터",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "theme": "공허/엔트로피 (창조에 맞서는 소멸의 힘). 유닛이 원소를 모아 우주를 빚는 동안, 적은 그것을 무(無)로 되돌리려 한다.",
-    "scaleAxis": "적의 스케일은 유닛 단계와 함께 커진다. 1구간=원소급, 5구간=우주붕괴급.",
+    "scaleAxis": "1구간=먼지급(원소와 대립되는 가벼운 입자), 5구간=우주붕괴급.",
     "roles": {
       "swarm":   "물량형 - 약하지만 떼로 몰려와 광역 처리를 강요",
       "tank":    "탱커형 - 느리고 단단해 고화력(고단계 유닛)을 강요",
@@ -11,50 +11,23 @@
       "special": "특수형 - 아군 강화/보호막/소환 등으로 조합 변경을 강요",
       "boss":    "보스 - 구간 정점. 특정 단계 유닛이 없으면 사실상 못 막음"
     },
-    "statNote": "hp/speed/count는 기준값(배율 튜닝용). reqTier는 '권장 대응 유닛 단계'. 밸런스는 추후 수치로 조정."
+    "statNote": "hp/speed/count는 기준값(참고). 실제 HP는 balance.js 공식으로 계산. reqTier는 '권장 대응 유닛 단계'."
   },
 
   "segments": [
-    {
-      "id": "seg1",
-      "name": "원소기",
-      "waves": "1-10",
-      "scale": "원소급 (작은 현상)",
-      "reqTier": 2,
-      "desc": "불티·돌풍 같은 미시적 소멸 입자. 1~2단계 유닛으로 대응."
-    },
-    {
-      "id": "seg2",
-      "name": "기상기",
-      "waves": "11-20",
-      "scale": "자연재해급",
-      "reqTier": 3,
-      "desc": "폭풍·한파 형태로 뭉친 공허. 3단계 날씨 유닛이 필요해진다."
-    },
-    {
-      "id": "seg3",
-      "name": "지질기",
-      "waves": "21-30",
-      "scale": "대지각급 (거대 자연)",
-      "reqTier": 4,
-      "desc": "대지를 무너뜨리는 거수급. 4단계 유닛으로 화력 확보 필요."
-    },
-    {
-      "id": "seg4",
-      "name": "천체기",
-      "waves": "31-40",
-      "scale": "우주급",
-      "reqTier": 5,
-      "desc": "죽은 별과 공허의 군주. 5단계 천체 유닛이 사실상 필수."
-    }
+    { "id": "seg1", "name": "분진기",   "waves": "1-10",  "scale": "먼지급 (가벼운 입자)",   "reqTier": 2, "desc": "원소와 대립되는 먼지·미세먼지 같은 가벼운 소멸 입자. 1~2단계 유닛으로 대응." },
+    { "id": "seg2", "name": "기상기",   "waves": "11-20", "scale": "자연재해급",            "reqTier": 3, "desc": "폭풍·한파 형태로 뭉친 공허. 3단계 날씨 유닛이 필요해진다." },
+    { "id": "seg3", "name": "지질기",   "waves": "21-30", "scale": "대지각급 (거대 자연)",   "reqTier": 4, "desc": "대지를 무너뜨리는 거수급. 4단계 유닛으로 화력 확보 필요." },
+    { "id": "seg4", "name": "천체기",   "waves": "31-40", "scale": "우주급",                "reqTier": 5, "desc": "죽은 별과 공허의 군주. 5단계 천체 유닛이 사실상 필수." },
+    { "id": "seg5", "name": "붕괴기",   "waves": "41-50", "scale": "우주붕괴급",            "reqTier": 6, "desc": "우주가 무너지는 종말. 6단계 행성·전체핵급 화력이 필요하다." }
   ],
 
   "enemies": [
-    { "id": "spark_void",   "name": "암흑 불티",   "segment": "seg1", "role": "swarm",   "hp": 8,    "speed": 1.4, "count": 12, "reqTier": 1, "desc": "원소가 꺼진 자리에 피어나는 미세 입자. 떼로 몰려온다." },
-    { "id": "gust_rift",    "name": "균열 돌풍",   "segment": "seg1", "role": "fast",    "hp": 12,   "speed": 1.8, "count": 6,  "reqTier": 2, "desc": "공간이 찢어지며 빠르게 돌진하는 바람." },
-    { "id": "ash_crawler",  "name": "잿빛 기는것", "segment": "seg1", "role": "tank",    "hp": 45,   "speed": 0.7, "count": 3,  "reqTier": 2, "desc": "꺼진 재가 뭉친 둔중한 덩어리." },
-    { "id": "null_seed",    "name": "공허 씨앗",   "segment": "seg1", "role": "special", "hp": 20,   "speed": 1.0, "count": 2,  "reqTier": 2, "desc": "주변 적에게 약한 보호막을 두른다." },
-    { "id": "boss_collapse","name": "붕괴의 전조", "segment": "seg1", "role": "boss",    "hp": 220,  "speed": 0.6, "count": 1,  "reqTier": 2, "desc": "[10웨이브 보스] 원소기를 닫는 첫 균열체. 2단계 조합 다수 필요." },
+    { "id": "dust",         "name": "먼지",        "segment": "seg1", "role": "swarm",   "hp": 6,    "speed": 1.5, "count": 14, "reqTier": 1, "desc": "원소가 흩어진 자리에 떠다니는 미세 입자. 떼로 몰려온다." },
+    { "id": "finedust",     "name": "미세먼지",    "segment": "seg1", "role": "fast",    "hp": 9,    "speed": 2.0, "count": 8,  "reqTier": 1, "desc": "더 작고 빠르게 방어선을 파고드는 입자." },
+    { "id": "dustclump",    "name": "먼지뭉치",    "segment": "seg1", "role": "tank",    "hp": 40,   "speed": 0.7, "count": 3,  "reqTier": 2, "desc": "엉겨붙은 먼지 덩어리. 둔하지만 단단하다." },
+    { "id": "spore",        "name": "홀씨",        "segment": "seg1", "role": "special", "hp": 18,   "speed": 1.1, "count": 2,  "reqTier": 2, "desc": "주변 입자에게 약한 보호막을 두른다." },
+    { "id": "boss_sandstorm","name": "황사 폭풍",  "segment": "seg1", "role": "boss",    "hp": 220,  "speed": 0.6, "count": 1,  "reqTier": 2, "desc": "[10웨이브 보스] 분진기를 닫는 거대 먼지 폭풍. 2단계 조합 다수 필요." },
 
     { "id": "storm_wraith", "name": "폭풍 망령",   "segment": "seg2", "role": "fast",    "hp": 60,   "speed": 1.7, "count": 8,  "reqTier": 3, "desc": "뒤틀린 폭풍의 형상. 빠르고 회피적." },
     { "id": "frost_horde",  "name": "한파 무리",   "segment": "seg2", "role": "swarm",   "hp": 35,   "speed": 1.1, "count": 16, "reqTier": 2, "desc": "얼어붙은 공허 조각이 대량으로 밀려온다." },
@@ -72,6 +45,12 @@
     { "id": "asteroid_rain","name": "소행성군",    "segment": "seg4", "role": "swarm",   "hp": 200,  "speed": 1.2, "count": 24, "reqTier": 4, "desc": "공허에 떠밀린 암석 무리가 쏟아진다." },
     { "id": "void_comet",   "name": "공허 혜성",   "segment": "seg4", "role": "fast",    "hp": 700,  "speed": 2.0, "count": 6,  "reqTier": 5, "desc": "초고속으로 방어선을 꿰뚫는 혜성." },
     { "id": "entropy_maw",  "name": "엔트로피 아가리","segment": "seg4","role": "special","hp": 1500, "speed": 0.6, "count": 2,  "reqTier": 5, "desc": "아군 적의 체력을 흡수해 점점 강해진다." },
-    { "id": "boss_blackhole","name": "공허의 군주 (블랙홀)","segment": "seg4","role": "boss","hp": 12000,"speed": 0.3,"count": 1,"reqTier": 5,"desc": "[40웨이브 최종 보스] 우주를 삼키는 블랙홀. 5단계 천체 유닛(항성·은하 등) 없이는 사실상 격파 불가." }
+    { "id": "boss_blackhole","name": "공허의 군주 (블랙홀)","segment": "seg4","role": "boss","hp": 12000,"speed": 0.3,"count": 1,"reqTier": 5,"desc": "[40웨이브 보스] 우주를 삼키는 블랙홀. 5단계 천체 유닛 다수 필요." },
+
+    { "id": "void_shard",   "name": "공허 파편",     "segment": "seg5", "role": "swarm",   "hp": 400,   "speed": 1.3, "count": 28, "reqTier": 5, "desc": "붕괴된 우주의 잔해가 무수히 쏟아진다." },
+    { "id": "light_particle","name": "광속 입자",    "segment": "seg5", "role": "fast",    "hp": 1200,  "speed": 2.3, "count": 7,  "reqTier": 6, "desc": "빛의 속도로 방어선을 관통하는 입자." },
+    { "id": "neutron_star", "name": "중성자별",      "segment": "seg5", "role": "tank",    "hp": 5000,  "speed": 0.35,"count": 5,  "reqTier": 6, "desc": "초고밀도로 짓눌린 별. 상상 이상의 내구." },
+    { "id": "entropy_core", "name": "엔트로피 핵",   "segment": "seg5", "role": "special", "hp": 3000,  "speed": 0.6, "count": 2,  "reqTier": 6, "desc": "주변을 무질서로 물들여 아군 적을 강화한다." },
+    { "id": "boss_collapse","name": "대붕괴",        "segment": "seg5", "role": "boss",    "hp": 30000, "speed": 0.3, "count": 1,  "reqTier": 6, "desc": "[50웨이브 최종 보스] 우주를 무로 되돌리는 종말. 6단계 행성·전체핵급 화력 없이는 격파 불가." }
   ]
 }
