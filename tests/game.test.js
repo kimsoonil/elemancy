@@ -269,3 +269,25 @@ test('drawRandomUnit — 슬롯 있으면 보드에 자동 배치', () => {
   assert.equal(g.towers.length, 1);
   assert.equal(g.towers[0].unitId, id);
 });
+
+test('전체핵 = 1단계 8원소, 6단계는 전체핵 1개 필요', () => {
+  const g = newGame(seqRng([0]));
+  const wc = g.alchemy.get('wholecore');
+  assert.equal(wc.inputs.length, 8);                 // 8원소
+  const mercury = g.alchemy.get('mercury');
+  assert.ok(mercury.inputs.includes('wholecore'));   // 6단계는 전체핵 사용
+  assert.equal(mercury.tier, 6);
+});
+
+test('7단계는 전체핵 3개 + 게임당 1회만', () => {
+  const g = newGame(seqRng([0]));
+  const ss = g.alchemy.get('solarsystem');
+  assert.equal(ss.tier, 7);
+  assert.equal(ss.inputs.filter((x) => x === 'wholecore').length, 3); // 전체핵 3개
+  g.bench = {}; g.towers = []; g.slots = [];
+  g.bench = { wholecore: 3, sun: 1, terra: 1 };
+  assert.equal(g.combine('solarsystem'), true);
+  assert.equal(g.finalBuilt, true);
+  g.bench = { wholecore: 3, sun: 1, terra: 1 };
+  assert.equal(g.combine('solarsystem'), false);     // 두 번째 거부
+});

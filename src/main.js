@@ -50,20 +50,31 @@ async function boot() {
   let recipesBuilt = false;
   function buildRecipes() {
     if (recipesBuilt) return; recipesBuilt = true;
-    const byTier = { 1: [], 2: [], 3: [], 4: [], 5: [] };
+    const byTier = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [] };
     for (const e of recipes.elements) byTier[1].push(e);
-    for (const r of recipes.recipes) byTier[r.tier].push(r);
-    const tierName = { 1: '1단계 · 기본 원소', 2: '2단계', 3: '3단계', 4: '4단계', 5: '5단계 · 천체' };
-    let html = '';
-    for (let t = 1; t <= 5; t++) {
-      html += `<div class="tier-block"><h3>${tierName[t]}</h3><div class="recipe-grid">`;
-      for (const u of byTier[t]) {
-        const ing = u.inputs ? u.inputs.map((id) => alchemy.name(id)).join(' + ') : '기본 원소';
-        html += `<div class="recipe"><div class="res">${alchemy.name(u.id)}</div><div class="ing">${ing}</div></div>`;
-      }
-      html += '</div></div>';
+    for (const r of recipes.recipes) (byTier[r.tier] || (byTier[r.tier] = [])).push(r);
+    const tierName = {
+      1: '1단계 · 기본 원소', 2: '2단계', 3: '3단계', 4: '4단계',
+      5: '5단계 · 천체', 6: '6단계 · 행성', 7: '7단계 · 최종',
+    };
+    const tabs = document.getElementById('recipeTabs');
+    const body = document.getElementById('recipeBody');
+    const gridFor = (t) => (byTier[t] || []).map((u) => {
+      const ing = u.inputs ? u.inputs.map((id) => alchemy.name(id)).join(' + ') : '기본 원소';
+      return `<div class="recipe"><div class="res">${alchemy.name(u.id)}</div><div class="ing">${ing}</div></div>`;
+    }).join('');
+    const show = (t) => {
+      body.innerHTML = `<div class="recipe-grid">${gridFor(t)}</div>`;
+      [...tabs.children].forEach((b) => b.classList.toggle('active', Number(b.dataset.tier) === t));
+    };
+    tabs.innerHTML = '';
+    for (let t = 1; t <= 7; t++) {
+      const b = document.createElement('button');
+      b.className = 'tab'; b.dataset.tier = t; b.textContent = tierName[t];
+      b.onclick = () => show(t);
+      tabs.appendChild(b);
     }
-    document.getElementById('recipeBody').innerHTML = html;
+    show(1);
   }
   document.getElementById('recipeBtn').onclick = () => { buildRecipes(); recipeModal.classList.remove('hidden'); };
   document.getElementById('recipeClose').onclick = () => recipeModal.classList.add('hidden');
@@ -197,7 +208,7 @@ async function boot() {
       ? game.alchemy.usages(sel.unitId).slice().sort((a, b) => game.alchemy.get(a).tier - game.alchemy.get(b).tier)
       : [];
     // 변경이 없으면 다시 그리지 않음(매 프레임 재생성 시 버튼 클릭이 씹힘)
-    const sig = `${sel ? sel.uid : ''}|${sel ? sel.unitId : ''}|${game.moveMode}|` +
+    const sig = `${sel ? sel.uid : ''}|${sel ? sel.unitId : ''}|${game.moveMode}|${game.finalBuilt}|` +
       allUses.map((id) => id + (craftable.has(id) ? '1' : '0')).join(',');
     if (sig === selSig) return;
     selSig = sig;
@@ -225,12 +236,15 @@ async function boot() {
       const col = document.createElement('div');
       col.className = 'btn-col';
       for (const id of allUses) {
-        const can = craftable.has(id);
-        const ing = game.alchemy.get(id).inputs.map((x) => alchemy.name(x)).join(' + ');
+        const u = game.alchemy.get(id);
+        const finalLocked = u.tier === 7 && game.finalBuilt; // 최종 1회 소진
+        const can = craftable.has(id) && !finalLocked;
+        const ing = u.inputs.map((x) => alchemy.name(x)).join(' + ');
         const b = document.createElement('button');
         b.className = 'mini combo';
         b.disabled = !can;
-        b.innerHTML = `<span class="combo-name">${alchemy.name(id)}${can ? '' : ' 🔒'}</span>` +
+        const mark = finalLocked ? ' ✅(최종 완료)' : can ? '' : ' 🔒';
+        b.innerHTML = `<span class="combo-name">${alchemy.name(id)}${mark}</span>` +
           `<span class="combo-recipe">${ing}</span>`;
         b.onclick = () => { if (game.combine(id)) flash(`조합 완성: ${alchemy.name(id)}`, 'good'); };
         col.appendChild(b);

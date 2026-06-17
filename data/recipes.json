@@ -1,14 +1,17 @@
 {
   "meta": {
     "title": "원소 연금술 조합 디펜스 - 합성 트리",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "combineRules": {
       "tier2": "tier1 x2",
-      "tier3": "tier2 x2  (또는 tier2 + tier1)",
+      "tier3": "tier2 x2 (또는 tier2 + tier1)",
       "tier4": "tier3 x2 + tier2 x1",
-      "tier5": "tier4 x2 + tier3 x1 + tier2 x1"
+      "tier5": "tier4 계열 2개 (천체 소형 분류)",
+      "wholecore": "전체핵 = 1단계 8원소 각 1개",
+      "tier6": "전체핵 x1 + 5단계 천체 2개 (행성)",
+      "tier7": "전체핵 x3 + 6단계 행성 2개 (최종, 게임당 1회)"
     },
-    "note": "elements는 1단계 기본 유닛. recipes는 2~5단계 합성식. inputs 배열은 순서 무관, 다중 동일 재료 허용."
+    "note": "elements는 1단계 기본 유닛. recipes는 2~7단계 합성식 + 전체핵(wholecore). inputs 배열은 순서 무관, 다중 동일 재료 허용."
   },
 
   "elements": [
@@ -52,11 +55,34 @@
     { "id": "jungle",     "name": "정글",     "tier": 4, "inputs": ["forest", "peat", "sap"] },
     { "id": "iceage",     "name": "빙하기",   "tier": 4, "inputs": ["snow", "hail", "coldiron"] },
 
-    { "id": "planet",     "name": "행성",     "tier": 5, "inputs": ["eruption", "aurora", "magfield", "mud"] },
-    { "id": "star",       "name": "항성",     "tier": 5, "inputs": ["eruption", "storm", "magma", "molten"] },
-    { "id": "gasgiant",   "name": "가스행성", "tier": 5, "inputs": ["iceage", "storm", "cloud", "fog"] },
-    { "id": "lifeplanet", "name": "생명행성", "tier": 5, "inputs": ["jungle", "iceage", "forest", "sap"] },
-    { "id": "starsystem", "name": "항성계",   "tier": 5, "inputs": ["eruption", "aurora", "magfield", "magnet"] },
-    { "id": "galaxy",     "name": "은하",     "tier": 5, "inputs": ["storm", "aurora", "magfield", "magnet"] }
+    { "id": "meteor",      "name": "운석",     "tier": 5, "inputs": ["eruption", "magma"] },
+    { "id": "asteroid",    "name": "소행성",   "tier": 5, "inputs": ["iceage", "magma"] },
+    { "id": "comet",       "name": "혜성",     "tier": 5, "inputs": ["blizzard", "storm"] },
+    { "id": "satellite",   "name": "위성",     "tier": 5, "inputs": ["iceage", "magfield"] },
+    { "id": "dwarf",       "name": "왜행성",   "tier": 5, "inputs": ["jungle", "iceage"] },
+    { "id": "singularity", "name": "특이점",   "tier": 5, "inputs": ["aurora", "storm"] },
+    { "id": "gasgiant",    "name": "가스행성", "tier": 5, "inputs": ["storm", "iceage"] },
+    { "id": "spacerock",   "name": "우주암석", "tier": 5, "inputs": ["eruption", "peat"] },
+    { "id": "spaceice",    "name": "우주얼음", "tier": 5, "inputs": ["blizzard", "iceage"] },
+
+    { "id": "wholecore", "name": "전체핵", "tier": 6, "inputs": ["water", "fire", "wind", "earth", "electric", "wood", "ice", "metal"] },
+
+    { "id": "mercury", "name": "수성",   "tier": 6, "inputs": ["wholecore", "meteor", "spacerock"] },
+    { "id": "venus",   "name": "금성",   "tier": 6, "inputs": ["wholecore", "gasgiant", "spacerock"] },
+    { "id": "terra",   "name": "지구",   "tier": 6, "inputs": ["wholecore", "satellite", "spaceice"] },
+    { "id": "mars",    "name": "화성",   "tier": 6, "inputs": ["wholecore", "meteor", "asteroid"] },
+    { "id": "jupiter", "name": "목성",   "tier": 6, "inputs": ["wholecore", "gasgiant", "comet"] },
+    { "id": "saturn",  "name": "토성",   "tier": 6, "inputs": ["wholecore", "gasgiant", "satellite"] },
+    { "id": "uranus",  "name": "천왕성", "tier": 6, "inputs": ["wholecore", "spaceice", "gasgiant"] },
+    { "id": "neptune", "name": "해왕성", "tier": 6, "inputs": ["wholecore", "spaceice", "comet"] },
+    { "id": "sun",     "name": "태양",   "tier": 6, "inputs": ["wholecore", "singularity", "meteor"] },
+
+    { "id": "solarsystem", "name": "태양계",     "tier": 7, "inputs": ["wholecore", "wholecore", "wholecore", "sun", "terra"] },
+    { "id": "blackhole",   "name": "블랙홀",     "tier": 7, "inputs": ["wholecore", "wholecore", "wholecore", "sun", "jupiter"] },
+    { "id": "milkyway",    "name": "은하수",     "tier": 7, "inputs": ["wholecore", "wholecore", "wholecore", "sun", "saturn"] },
+    { "id": "andromeda",   "name": "안드로메다", "tier": 7, "inputs": ["wholecore", "wholecore", "wholecore", "jupiter", "saturn"] },
+    { "id": "oortcloud",   "name": "오르트구름", "tier": 7, "inputs": ["wholecore", "wholecore", "wholecore", "uranus", "neptune"] },
+    { "id": "supernova",   "name": "초신성",     "tier": 7, "inputs": ["wholecore", "wholecore", "wholecore", "sun", "mars"] },
+    { "id": "quasar",      "name": "퀘이사",     "tier": 7, "inputs": ["wholecore", "wholecore", "wholecore", "sun", "uranus"] }
   ]
 }

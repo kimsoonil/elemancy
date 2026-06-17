@@ -92,9 +92,13 @@
     .modal-card h2 { margin: 0 0 4px; font-size: 18px; }
     .modal-head { display: flex; align-items: center; margin-bottom: 14px; }
     .modal-head .close { margin-left: auto; width: auto; padding: 6px 12px; background: rgba(255,255,255,0.08); box-shadow: none; }
-    .tier-block { margin-bottom: 16px; }
-    .tier-block h3 { font-size: 13px; color: var(--accent); margin: 0 0 8px; letter-spacing: 1px; }
-    .recipe-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
+    .recipe-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+    .recipe-tabs .tab {
+      width: auto; margin: 0; padding: 7px 12px; font-size: 12px; font-weight: 600;
+      background: rgba(123,140,255,0.12); border: 1px solid var(--line); box-shadow: none;
+    }
+    .recipe-tabs .tab.active { background: linear-gradient(135deg, var(--accent), var(--accent2)); }
+    .recipe-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
     .recipe { background: rgba(255,255,255,0.04); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-size: 13px; }
     .recipe .res { font-weight: 700; }
     .recipe .ing { color: var(--muted); font-size: 12px; margin-top: 3px; }
@@ -241,6 +245,7 @@
         <h2>📜 조합식 — 원소 연금술 트리</h2>
         <button class="close" id="recipeClose">✕ 닫기</button>
       </div>
+      <div id="recipeTabs" class="recipe-tabs"></div>
       <div id="recipeBody"></div>
     </div>
   </div>

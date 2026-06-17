@@ -22,6 +22,7 @@ class Game {
     this.bossTokens = 0;        // 원소 선택권
     this.gameOver = false;
     this.victory = false;
+    this.finalBuilt = false;    // 7단계(최종) 게임당 1회 제작 여부
     this._uid = 0;
     this._tier1 = alchemy.byTier(1).map((u) => u.id);
     this.path = [];        // main에서 주입
@@ -114,6 +115,7 @@ class Game {
   combine(resultId) {
     const unit = this.alchemy.get(resultId);
     if (!unit || !unit.inputs) return false;
+    if (unit.tier === 7 && this.finalBuilt) return false; // 최종 진화는 게임당 1회
     const need = {};
     for (const id of unit.inputs) need[id] = (need[id] || 0) + 1;
     const owned = this.ownedCounts();
@@ -137,6 +139,7 @@ class Game {
       }
     }
     this.autoPlace(resultId); // 결과물 자동 배치
+    if (unit.tier === 7) this.finalBuilt = true;
     return true;
   }
 

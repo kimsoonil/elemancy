@@ -11,7 +11,7 @@ var CONFIG = {
 
   // 타워 능력치
   TIER1_BAND: { high: [15, 20], normal: [10, 15] },
-  RANGE_BY_TIER: { 1: 2.0, 2: 2.2, 3: 2.5, 4: 2.8, 5: 3.2 },
+  RANGE_BY_TIER: { 1: 2.0, 2: 2.2, 3: 2.5, 4: 2.8, 5: 3.2, 6: 3.6, 7: 4.0 },
   BASE_ATK_SPEED: 1.0,
   FAST_ATK_SPEED: 1.5,
   SLOW_FACTOR: 0.6,    // 이동속도 ×0.6 (= -40%)

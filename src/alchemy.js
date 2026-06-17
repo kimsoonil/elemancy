@@ -143,32 +143,14 @@ class Alchemy {
 
   /* 데이터 무결성 검증 -------------------------------------- */
 
-  /** 존재하지 않는 재료 참조, 단계 규칙 위반 등을 점검 */
+  /** 존재하지 않는 재료 참조 점검 (단계 구성은 자유 — 전체핵/6·7단계 등 커스텀 레시피 허용) */
   validate() {
     const errors = [];
-    const tierRule = { 4: { 3: 2, 2: 1 }, 5: { 4: 2, 3: 1, 2: 1 } };
     for (const u of this.units.values()) {
       if (!u.inputs) continue;
-      // 1) 재료 존재 여부
       for (const inId of u.inputs) {
         if (!this.units.has(inId)) {
           errors.push(`${u.id}(${u.name}): 존재하지 않는 재료 '${inId}'`);
-        }
-      }
-      // 2) 단계 구성 규칙 점검 (4,5단계만)
-      const rule = tierRule[u.tier];
-      if (rule) {
-        const got = {};
-        for (const inId of u.inputs) {
-          const t = this.units.get(inId)?.tier;
-          if (t != null) got[t] = (got[t] || 0) + 1;
-        }
-        for (const [t, need] of Object.entries(rule)) {
-          if ((got[t] || 0) !== need) {
-            errors.push(
-              `${u.id}(${u.name}): ${u.tier}단계 규칙 위반 - ${t}단계 재료 ${need}개 필요, ${got[t] || 0}개`
-            );
-          }
         }
       }
     }
