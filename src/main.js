@@ -191,11 +191,14 @@ async function boot() {
   let selSig = null;
   function renderSelected() {
     const sel = game.towers.find((t) => t.uid === game.selectedUid);
-    // 이 유닛이 재료로 들어가는, 지금 만들 수 있는 조합
-    const craftable = sel ? new Set(game.alchemy.craftable(game.ownedCounts())) : null;
-    const uses = sel ? game.alchemy.usages(sel.unitId).filter((id) => craftable.has(id)) : [];
+    // 이 유닛이 재료로 들어가는 모든 상위 조합(현재 제작 가능 여부와 무관하게 전부)
+    const craftable = sel ? new Set(game.alchemy.craftable(game.ownedCounts())) : new Set();
+    const allUses = sel
+      ? game.alchemy.usages(sel.unitId).slice().sort((a, b) => game.alchemy.get(a).tier - game.alchemy.get(b).tier)
+      : [];
     // 변경이 없으면 다시 그리지 않음(매 프레임 재생성 시 버튼 클릭이 씹힘)
-    const sig = `${sel ? sel.uid : ''}|${sel ? sel.unitId : ''}|${game.moveMode}|${uses.join(',')}`;
+    const sig = `${sel ? sel.uid : ''}|${sel ? sel.unitId : ''}|${game.moveMode}|` +
+      allUses.map((id) => id + (craftable.has(id) ? '1' : '0')).join(',');
     if (sig === selSig) return;
     selSig = sig;
 
@@ -218,21 +221,25 @@ async function boot() {
     actions.appendChild(moveBtn);
     selectedPanel.appendChild(actions);
 
-    if (uses.length) {
-      const row = document.createElement('div');
-      row.className = 'btn-row';
-      for (const id of uses) {
+    if (allUses.length) {
+      const col = document.createElement('div');
+      col.className = 'btn-col';
+      for (const id of allUses) {
+        const can = craftable.has(id);
+        const ing = game.alchemy.get(id).inputs.map((x) => alchemy.name(x)).join(' + ');
         const b = document.createElement('button');
-        b.className = 'mini';
-        b.textContent = `${alchemy.name(id)} 조합`;
+        b.className = 'mini combo';
+        b.disabled = !can;
+        b.innerHTML = `<span class="combo-name">${alchemy.name(id)}${can ? '' : ' 🔒'}</span>` +
+          `<span class="combo-recipe">${ing}</span>`;
         b.onclick = () => { if (game.combine(id)) flash(`조합 완성: ${alchemy.name(id)}`, 'good'); };
-        row.appendChild(b);
+        col.appendChild(b);
       }
-      selectedPanel.appendChild(row);
+      selectedPanel.appendChild(col);
     } else {
       const m = document.createElement('div');
       m.className = 'muted'; m.style.marginTop = '6px';
-      m.textContent = '이 유닛으로 지금 만들 수 있는 조합이 없어요';
+      m.textContent = '이 유닛이 들어가는 상위 조합이 없어요';
       selectedPanel.appendChild(m);
     }
   }

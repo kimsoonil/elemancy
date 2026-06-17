@@ -164,8 +164,13 @@
       box-shadow: none; display: flex; justify-content: space-between; gap: 8px; align-items: center;
     }
     .mini:hover:not(:disabled) { background: rgba(123,140,255,0.28); }
+    .mini:disabled { opacity: 0.45; cursor: default; }
     .mini .cost { font-size: 11px; color: #ffd23c; }
     .btn-row .mini { flex: 1 1 auto; justify-content: center; }
+    /* 조합 옵션: 결과명 + 작은 조합식 */
+    .combo { flex-direction: column; align-items: flex-start; gap: 2px; }
+    .combo .combo-name { font-weight: 600; }
+    .combo .combo-recipe { font-size: 11px; color: var(--muted); }
     .log {
       margin-top: 6px; font-size: 12px; min-height: 16px; color: var(--muted);
       transition: color .2s;
