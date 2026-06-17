@@ -396,3 +396,14 @@ test('난이도 방어도 — 적 체력 배수 적용', () => {
   };
   assert.equal(mk(2), mk(1) * 2); // 어려움(2배)은 보통의 2배 체력
 });
+
+test('sellTower — 티어×50 골드 환급 + 보드에서 제거', () => {
+  const g = newGame(seqRng([0]));
+  g.bench = {}; g.towers = []; g.slots = [{ x: 2, y: 2 }]; g.gold = 0;
+  const t = g.autoPlace('water'); // tier1
+  const refund = g.sellTower(t.uid);
+  assert.equal(refund, 1 * CONFIG.GOLD_SELL_BASE); // 50
+  assert.equal(g.gold, 50);
+  assert.equal(g.towers.length, 0);
+  assert.equal(g.sellTower('nope'), false);
+});

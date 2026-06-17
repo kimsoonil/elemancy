@@ -238,7 +238,8 @@ async function boot() {
       : [];
     const costs = allUses.map((id) => game.combineCost(id));
     // 변경이 없으면 다시 그리지 않음(매 프레임 재생성 시 버튼 클릭이 씹힘)
-    const sig = `${sel ? sel.uid : ''}|${sel ? sel.unitId : ''}|${game.moveMode}|${game.finalBuilt}|${game.bossTokens}|` +
+    const upLv = sel ? game.upgrades[sel.tier] : 0;
+    const sig = `${sel ? sel.uid : ''}|${sel ? sel.unitId : ''}|${game.moveMode}|${game.finalBuilt}|${game.bossTokens}|${upLv}|` +
       allUses.map((id, i) => id + ':' + costs[i]).join(',');
     if (sig === selSig) return;
     selSig = sig;
@@ -253,6 +254,18 @@ async function boot() {
     info.innerHTML = `<b>${alchemy.name(sel.unitId)}</b><span class="muted">T${sel.tier} · ${ATK_LABEL[sel.atkType] || ''}</span>`;
     selectedPanel.appendChild(info);
 
+    // 상세 능력치
+    const stat = document.createElement('div');
+    stat.className = 'unit-stats';
+    if (sel.atkType === 'buff') {
+      stat.innerHTML = `<span>주변 공격력 +25% · 공속↑</span><span>사거리 ${CONFIG.BUFF_RADIUS}</span>`;
+    } else {
+      const eff = Math.round(sel.damage * game.damageMultiplier(sel.tier));
+      const upTag = upLv > 0 ? ` <span style="color:#8bf0a8">(+${upLv}%)</span>` : '';
+      stat.innerHTML = `<span>⚔️ 데미지 <b>${eff}</b>${upTag}</span><span>🎯 사거리 ${sel.range}</span><span>⏱ 공속 ${sel.atkSpeed}/s</span>`;
+    }
+    selectedPanel.appendChild(stat);
+
     const actions = document.createElement('div');
     actions.className = 'btn-row';
     const moveBtn = document.createElement('button');
@@ -260,6 +273,11 @@ async function boot() {
     moveBtn.textContent = game.moveMode ? '🔀 이동할 칸 클릭…' : '🔀 이동';
     moveBtn.onclick = () => { game.moveMode = !game.moveMode; };
     actions.appendChild(moveBtn);
+    const sellBtn = document.createElement('button');
+    sellBtn.className = 'mini';
+    sellBtn.innerHTML = `💰 판매<span class="cost">+${sel.tier * CONFIG.GOLD_SELL_BASE}</span>`;
+    sellBtn.onclick = () => { const r = game.sellTower(sel.uid); if (r) flash(`판매 +${r} 골드`, 'good'); };
+    actions.appendChild(sellBtn);
     selectedPanel.appendChild(actions);
 
     if (allUses.length) {

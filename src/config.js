@@ -34,6 +34,7 @@ var CONFIG = {
   GOLD_PER_ROUND: 200,  // 라운드 시작 시 정액 지급
   GOLD_PER_BOSS: 1000,  // 보스 처치 골드 = 보스인덱스 × 1000 (1000~5000)
   QUEST_INTERVAL: 8,    // 퀘스트 진행 간격(라운드) — 1회 후 다음까지 잠금
+  GOLD_SELL_BASE: 50,   // 타워 판매 환급 = 티어 × 50
 
   // 경제
   START_GOLD: 600,       // 시작 골드 (랜덤 뽑기 100G로 시작 유닛 구성)

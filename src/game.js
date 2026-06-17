@@ -104,6 +104,18 @@ class Game {
     return true;
   }
 
+  /** 타워 판매: 보드에서 제거하고 티어×GOLD_SELL_BASE 골드 환급. 없으면 false. */
+  sellTower(uid) {
+    const idx = this.towers.findIndex((t) => t.uid === uid);
+    if (idx < 0) return false;
+    const t = this.towers[idx];
+    const refund = t.tier * CONFIG.GOLD_SELL_BASE;
+    this.towers.splice(idx, 1);
+    if (this.selectedUid === uid) this.selectedUid = null;
+    this.gold += refund;
+    return refund;
+  }
+
   /** 배치 타워를 회수해 벤치로 되돌림. */
   recall(uid) {
     const idx = this.towers.findIndex((t) => t.uid === uid);
