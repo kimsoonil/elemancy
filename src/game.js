@@ -214,6 +214,7 @@ class Game {
     this.wave += 1;
     this.phase = 'combat';
     this.roundTimer = CONFIG.ROUND_TIME; // 다음 자동 웨이브까지 30초 리셋
+    this.gold += this.wave * CONFIG.GOLD_PER_ROUND; // 라운드 골드: 1000,2000,3000…
     // 웨이브 2부터는 라운드 보상(tier1 원소) 지급
     if (this.wave >= 2) this.grantRandomElements(CONFIG.WAVE_CLEAR_ELEMENTS);
 

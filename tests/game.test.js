@@ -293,3 +293,14 @@ test('7단계는 전체핵 3개 + 게임당 1회만', () => {
   g.bench = { wholecore: 3, sun: 1, terra: 1 };
   assert.equal(g.combine('solarsystem'), false);     // 두 번째 거부
 });
+
+test('라운드 시작 시 웨이브×1000 골드 지급', () => {
+  const g = newGame(seqRng([0]));
+  g.gold = 0;
+  g.startWave(); // wave1 → +1000
+  assert.equal(g.gold, 1000);
+  g.startWave(); // wave2 → +2000
+  assert.equal(g.gold, 3000);
+  g.startWave(); // wave3 → +3000
+  assert.equal(g.gold, 6000);
+});
