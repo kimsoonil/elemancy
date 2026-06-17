@@ -28,8 +28,9 @@ var CONFIG = {
   GAME_OVER_CAP: 100,
   DANGER_THRESHOLD: 80, // 위기 게이지 경고 표시 기준
   MAX_WAVE: 50,
-  ROUND_TIME: 30, // 한 라운드(웨이브 간격) 초 — 지나면 자동으로 다음 웨이브
-  GOLD_PER_ROUND: 1000, // 라운드 시작 시 웨이브×1000 골드 지급 (1000,2000,3000…)
+  ROUND_TIME: 30,       // 한 라운드(웨이브 간격) 초 — 지나면 자동으로 다음 웨이브
+  GOLD_PER_ROUND: 200,  // 라운드 시작 시 정액 지급
+  GOLD_PER_BOSS: 1000,  // 보스 처치 골드 = 보스인덱스 × 1000 (1000~5000)
 
   // 경제
   START_GOLD: 600,       // 시작 골드 (랜덤 뽑기 100G로 시작 유닛 구성)
@@ -47,8 +48,8 @@ var CONFIG = {
     3: { cost: 10000, rate: 0.3 },
   },
 
-  // 골드 획득 (역할별 기본값; 튜닝값)
-  GOLD_PER_KILL: { swarm: 5, fast: 8, special: 15, tank: 20, boss: 200 },
+  // 적 처치 골드(역할별; 보스는 GOLD_PER_BOSS로 별도 처리)
+  GOLD_PER_KILL: { swarm: 5, fast: 8, special: 15, tank: 20 },
 };
 
 if (typeof module !== 'undefined' && module.exports) {

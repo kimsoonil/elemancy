@@ -190,27 +190,33 @@ test('startWave 수동 호출 시 타이머 리셋', () => {
   assert.equal(g.roundTimer, CONFIG.ROUND_TIME);
 });
 
-test('웨이브 2부터 시작 시 tier1 원소 2개 라운드 보상', () => {
+test('startWave는 정액 200골드만 지급하고 무료 유닛은 없음', () => {
   const g = newGame(seqRng([0]));
-  g.bench = {}; g.towers = []; g.slots = [];
-  g.startWave(); // wave1 — 보상 없음
-  const after1 = Object.values(g.ownedCounts()).reduce((s, n) => s + n, 0);
-  g.startWave(); // wave2 — +2
-  const after2 = Object.values(g.ownedCounts()).reduce((s, n) => s + n, 0);
-  assert.equal(after2 - after1, CONFIG.WAVE_CLEAR_ELEMENTS);
+  g.bench = {}; g.towers = []; g.slots = []; g.gold = 0;
+  g.startWave();
+  assert.equal(g.gold, CONFIG.GOLD_PER_ROUND); // 200
+  assert.equal(Object.values(g.ownedCounts()).reduce((s, n) => s + n, 0), 0); // 유닛 미지급
 });
 
-test('보스 처치 시 원소 선택권 3·6·9·12·15 + 3·4구간 전체핵', () => {
+test('보스 처치 보상 — 골드 인덱스×1000 + 선택권 인덱스×3 + 3·4구간 전체핵', () => {
   const g = newGame(seqRng([0]));
   g.bench = {}; g.towers = []; g.slots = [];
-  g.bossTokens = 0;
-  g._onKill({ role: 'boss', bossIndex: 1 }); assert.equal(g.bossTokens, 3);   // w10
-  g._onKill({ role: 'boss', bossIndex: 2 }); assert.equal(g.bossTokens, 9);   // +6
-  g._onKill({ role: 'boss', bossIndex: 5 }); assert.equal(g.bossTokens, 24);  // +15
+  g.gold = 0; g.bossTokens = 0;
+  g._onKill({ role: 'boss', bossIndex: 1 }); // 골드 1000, 토큰 3
+  assert.equal(g.gold, 1000); assert.equal(g.bossTokens, 3);
+  g._onKill({ role: 'boss', bossIndex: 5 }); // 골드 +5000, 토큰 +15
+  assert.equal(g.gold, 6000); assert.equal(g.bossTokens, 18);
   // 3·4구간 보스는 전체핵 1개씩 지급
   g._onKill({ role: 'boss', bossIndex: 3 });
   g._onKill({ role: 'boss', bossIndex: 4 });
   assert.equal(g.ownedCounts().wholecore, 2);
+});
+
+test('일반 적 처치는 역할별 소액 골드, 라운드는 200 정액', () => {
+  const g = newGame(seqRng([0]));
+  g.gold = 0;
+  g._onKill({ role: 'swarm' });
+  assert.equal(g.gold, CONFIG.GOLD_PER_KILL.swarm); // 5
 });
 
 test('마지막 웨이브(50) 후 전멸하면 승리', () => {
@@ -294,13 +300,10 @@ test('7단계는 전체핵 3개 + 게임당 1회만', () => {
   assert.equal(g.combine('solarsystem'), false);     // 두 번째 거부
 });
 
-test('라운드 시작 시 웨이브×1000 골드 지급', () => {
+test('라운드 시작마다 200골드 정액 지급', () => {
   const g = newGame(seqRng([0]));
   g.gold = 0;
-  g.startWave(); // wave1 → +1000
-  assert.equal(g.gold, 1000);
-  g.startWave(); // wave2 → +2000
-  assert.equal(g.gold, 3000);
-  g.startWave(); // wave3 → +3000
-  assert.equal(g.gold, 6000);
+  g.startWave(); assert.equal(g.gold, 200);
+  g.startWave(); assert.equal(g.gold, 400);
+  g.startWave(); assert.equal(g.gold, 600);
 });

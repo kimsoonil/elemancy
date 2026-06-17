@@ -214,9 +214,7 @@ class Game {
     this.wave += 1;
     this.phase = 'combat';
     this.roundTimer = CONFIG.ROUND_TIME; // 다음 자동 웨이브까지 30초 리셋
-    this.gold += this.wave * CONFIG.GOLD_PER_ROUND; // 라운드 골드: 1000,2000,3000…
-    // 웨이브 2부터는 라운드 보상(tier1 원소) 지급
-    if (this.wave >= 2) this.grantRandomElements(CONFIG.WAVE_CLEAR_ELEMENTS);
+    this.gold += CONFIG.GOLD_PER_ROUND;  // 라운드 시작 정액 골드(200)
 
     const comp = this.waveSystem.composeWave(this.wave);
     const normals = comp.spawns.filter((s) => s.role !== 'boss');
@@ -255,11 +253,13 @@ class Game {
 
   /** 전투 중 적 사망 시: 골드 지급, 보스면 원소 선택권(+3·4구간 보스는 전체핵) 지급. */
   _onKill(enemy) {
-    this.gold += CONFIG.GOLD_PER_KILL[enemy.role] || 5;
     if (enemy.role === 'boss') {
       const idx = enemy.bossIndex || 1;
-      this.bossTokens += CONFIG.BOSS_TOKEN_STEP * idx; // 3,6,9,12,15
+      this.gold += idx * CONFIG.GOLD_PER_BOSS;          // 1000,2000,3000,4000,5000
+      this.bossTokens += CONFIG.BOSS_TOKEN_STEP * idx;  // 3,6,9,12,15
       if (idx === 3 || idx === 4) this.autoPlace('wholecore'); // 3·4구간 보스: 전체핵 1개
+    } else {
+      this.gold += CONFIG.GOLD_PER_KILL[enemy.role] || 5;
     }
   }
 
