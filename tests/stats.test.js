@@ -56,3 +56,7 @@ test('deriveStats — 전체핵은 statTier로 3단계급 능력치', () => {
   // 지배 원소 물(둔화) 기준 3단계 밴드 = [10,15]×100
   assert.deepEqual(s.damageBand, [1000, 1500]);
 });
+
+test('atkType 오버라이드 — 특이점은 스턴', () => {
+  assert.equal(Stats.deriveStats(a, 'singularity').atkType, 'stun');
+});

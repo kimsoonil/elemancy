@@ -1,8 +1,8 @@
 const TILE = 64; // 1 격자 단위 = 64px
 
 // 공격 타입별 네온 색
-const TYPE_COLOR = { aoe: '#ff6a3d', single: '#7b8cff', slow: '#3fd7ff', buff: '#5cf08a' };
-const TYPE_ICON = { aoe: '💥', single: '🎯', slow: '❄️', buff: '✨' };
+const TYPE_COLOR = { aoe: '#ff6a3d', single: '#7b8cff', slow: '#3fd7ff', buff: '#5cf08a', stun: '#ffcf4d' };
+const TYPE_ICON = { aoe: '💥', single: '🎯', slow: '❄️', buff: '✨', stun: '💫' };
 
 // 적 역할별 스타일 (색·크기·표식)
 const ROLE_STYLE = {

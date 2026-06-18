@@ -14,10 +14,11 @@ var CONFIG = {
   RANGE_BY_TIER: { 1: 2.0, 2: 2.2, 3: 2.5, 4: 2.8, 5: 3.2, 6: 3.6, 7: 4.0 },
   BASE_ATK_SPEED: 1.0,
   FAST_ATK_SPEED: 1.5,
-  SLOW_FACTOR: 0.6,    // 이동속도 ×0.6 (= -40%)
+  SLOW_FACTOR: 0.5,    // 이동속도 ×0.5 (= -50%)
   SLOW_DURATION: 2.0,  // 초
-  BUFF_DMG_MULT: 1.25,
-  BUFF_ATK_SPEED: 1.75, // 1.5~2.0 사이 채택
+  STUN_DURATION: 1.0,  // 스턴: 완전 정지 시간(초) — 슬로우보다 강한 CC
+  BUFF_DMG_MULT: 1.3,  // 버프: 주변 공격력 +30%
+  BUFF_ATK_SPEED: 1.8, // 버프: 주변 공속 1.8
   BUFF_RADIUS: 2.5,
 
   // 적 HP / 캡

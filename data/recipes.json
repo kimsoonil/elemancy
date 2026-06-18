@@ -60,7 +60,7 @@
     { "id": "comet",       "name": "혜성",     "tier": 5, "inputs": ["blizzard", "storm"] },
     { "id": "satellite",   "name": "위성",     "tier": 5, "inputs": ["iceage", "magfield"] },
     { "id": "dwarf",       "name": "왜행성",   "tier": 5, "inputs": ["jungle", "iceage"] },
-    { "id": "singularity", "name": "특이점",   "tier": 5, "inputs": ["aurora", "storm"] },
+    { "id": "singularity", "name": "특이점",   "tier": 5, "atkType": "stun", "inputs": ["aurora", "storm"] },
     { "id": "gasgiant",    "name": "가스행성", "tier": 5, "inputs": ["storm", "iceage"] },
     { "id": "spacerock",   "name": "우주암석", "tier": 5, "inputs": ["eruption", "peat"] },
     { "id": "spaceice",    "name": "우주얼음", "tier": 5, "inputs": ["blizzard", "iceage"] },
@@ -77,12 +77,12 @@
     { "id": "neptune", "name": "해왕성", "tier": 6, "inputs": ["wholecore", "spaceice", "comet"] },
     { "id": "sun",     "name": "태양",   "tier": 6, "inputs": ["wholecore", "singularity", "meteor"] },
 
-    { "id": "quasar",      "name": "퀘이사",     "tier": 7, "inputs": ["wholecore", "wholecore", "wholecore", "sun", "uranus"] },
-    { "id": "solarsystem", "name": "태양계",     "tier": 7, "inputs": ["wholecore", "wholecore", "wholecore", "sun", "terra"] },
-    { "id": "oortcloud",   "name": "오르트구름", "tier": 7, "inputs": ["wholecore", "wholecore", "wholecore", "uranus", "neptune"] },
-    { "id": "supernova",   "name": "초신성",     "tier": 7, "inputs": ["wholecore", "wholecore", "wholecore", "sun", "mars"] },
-    { "id": "milkyway",    "name": "은하수",     "tier": 7, "inputs": ["wholecore", "wholecore", "wholecore", "sun", "saturn"] },
-    { "id": "andromeda",   "name": "안드로메다", "tier": 7, "inputs": ["wholecore", "wholecore", "wholecore", "jupiter", "saturn"] },
-    { "id": "blackhole",   "name": "블랙홀",     "tier": 7, "inputs": ["wholecore", "wholecore", "wholecore", "sun", "jupiter"] }
+    { "id": "quasar",      "name": "퀘이사",     "tier": 7, "atkType": "aoe",    "powerMult": 1.0, "inputs": ["wholecore", "wholecore", "wholecore", "sun", "uranus"] },
+    { "id": "solarsystem", "name": "태양계",     "tier": 7, "atkType": "single", "powerMult": 1.4, "inputs": ["wholecore", "wholecore", "wholecore", "sun", "terra"] },
+    { "id": "oortcloud",   "name": "오르트구름", "tier": 7, "atkType": "slow",   "powerMult": 1.8, "inputs": ["wholecore", "wholecore", "wholecore", "uranus", "neptune"] },
+    { "id": "supernova",   "name": "초신성",     "tier": 7, "atkType": "aoe",    "powerMult": 2.3, "inputs": ["wholecore", "wholecore", "wholecore", "sun", "mars"] },
+    { "id": "milkyway",    "name": "은하수",     "tier": 7, "atkType": "single", "powerMult": 2.9, "inputs": ["wholecore", "wholecore", "wholecore", "sun", "saturn"] },
+    { "id": "andromeda",   "name": "안드로메다", "tier": 7, "atkType": "aoe",    "powerMult": 3.6, "inputs": ["wholecore", "wholecore", "wholecore", "jupiter", "saturn"] },
+    { "id": "blackhole",   "name": "블랙홀",     "tier": 7, "atkType": "stun",   "powerMult": 4.5, "inputs": ["wholecore", "wholecore", "wholecore", "sun", "jupiter"] }
   ]
 }

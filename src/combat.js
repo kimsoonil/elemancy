@@ -25,17 +25,21 @@ function buffMultipliers(tower, towers) {
     : { dmgMult: 1, atkSpeed: tower.atkSpeed };
 }
 
-/** 타격 해소: 데미지 적용 + 슬로우면 둔화 부여. */
+/** 타격 해소: 데미지 적용 + 슬로우/스턴 부여. */
 function resolveHit(tower, enemy, now) {
   enemy.hp -= tower.damage;
   if (tower.atkType === 'slow') {
     enemy.slowUntil = now + CONFIG.SLOW_DURATION;
+  } else if (tower.atkType === 'stun') {
+    enemy.stunUntil = now + CONFIG.STUN_DURATION;
   }
 }
 
-/** 슬로우 적용 중이면 감속된 이동속도. */
+/** 스턴 중이면 정지(0), 슬로우 중이면 감속, 아니면 기본 속도. */
 function effectiveSpeed(enemy, now) {
-  return now < enemy.slowUntil ? enemy.baseSpeed * CONFIG.SLOW_FACTOR : enemy.baseSpeed;
+  if (now < (enemy.stunUntil || 0)) return 0;
+  if (now < (enemy.slowUntil || 0)) return enemy.baseSpeed * CONFIG.SLOW_FACTOR;
+  return enemy.baseSpeed;
 }
 
 function pathLength(path) {

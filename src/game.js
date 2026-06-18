@@ -58,12 +58,13 @@ class Game {
   /** unitId로 타워 인스턴스 생성(능력치 부여) 후 보드에 추가. */
   _makeTower(unitId, pos) {
     const s = Stats.deriveStats(this.alchemy, unitId);
+    const powerMult = this.alchemy.get(unitId).powerMult || 1; // 유닛별 전투력 배수(7단계 순서 강화)
     const tower = {
       uid: this.nextUid(),
       unitId,
       tier: s.tier,
       atkType: s.atkType,
-      damage: Stats.rollDamage(s.damageBand, this.rng()),
+      damage: Math.round(Stats.rollDamage(s.damageBand, this.rng()) * powerMult),
       atkSpeed: s.atkSpeed,
       range: s.range,
       x: pos.x, y: pos.y,

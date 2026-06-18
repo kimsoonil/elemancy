@@ -422,3 +422,12 @@ test('7단계 — 클리어 횟수만큼 순서대로 해금', () => {
   assert.equal(g2.isFinalUnlocked('solarsystem'), true);
   assert.equal(g2.isFinalUnlocked('blackhole'), false); // 마지막(7번째)
 });
+
+test('7단계 powerMult — 뒤 해금일수록 전투력 강함', () => {
+  const g = newGame(seqRng([0]));
+  const q = g._makeTower('quasar', { x: 2, y: 2 });     // powerMult 1.0
+  const b = g._makeTower('blackhole', { x: 3, y: 2 });  // powerMult 4.5
+  assert.ok(b.damage > q.damage, `blackhole ${b.damage} > quasar ${q.damage}`);
+  assert.equal(b.atkType, 'stun');  // 블랙홀 = 스턴
+  assert.equal(q.atkType, 'aoe');   // 퀘이사 = 광역
+});

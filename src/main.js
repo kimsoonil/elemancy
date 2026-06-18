@@ -109,7 +109,7 @@ async function boot() {
     game.moveMode = false;
   };
 
-  const ATK_LABEL = { aoe: '광역', single: '단일', slow: '둔화', buff: '버프' };
+  const ATK_LABEL = { aoe: '광역', single: '단일', slow: '둔화', buff: '버프', stun: '스턴' };
 
   // ── 골드 사용 컨트롤 (한 번만 생성, 라벨/활성은 매 프레임 갱신) ──
   const tier1 = alchemy.byTier(1).map((u) => u.id);
