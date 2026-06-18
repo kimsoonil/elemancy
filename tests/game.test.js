@@ -407,3 +407,16 @@ test('sellTower — 티어×50 골드 환급 + 보드에서 제거', () => {
   assert.equal(g.towers.length, 0);
   assert.equal(g.sellTower('nope'), false);
 });
+
+test('7단계 — 클리어 횟수만큼 순서대로 해금', () => {
+  const mk = (n) => new Game({ alchemy: new Alchemy(recipes), waveSystem: new WaveSystem(enemies), rng: seqRng([0]), unlockedFinals: n });
+  const g0 = mk(0); // 0클리어
+  assert.equal(g0.isFinalUnlocked('solarsystem'), false);
+  g0.bench = { wholecore: 3, sun: 1, terra: 1 }; g0.towers = []; g0.slots = []; g0.bossTokens = 0;
+  assert.equal(g0.combine('solarsystem'), false); // 잠겨서 조합 불가
+  const g1 = mk(1); // 1클리어 → 첫 7단계만
+  assert.equal(g1.isFinalUnlocked('solarsystem'), true);
+  assert.equal(g1.isFinalUnlocked('blackhole'), false);
+  const g2 = mk(2); // 2클리어 → 두 번째까지
+  assert.equal(g2.isFinalUnlocked('blackhole'), true);
+});
