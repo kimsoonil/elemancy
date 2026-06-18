@@ -318,6 +318,30 @@ async function boot() {
     [startScreen, difficultyScreen, resultScreen].forEach((s) => s.classList.toggle('hidden', s !== el));
   }
 
+  // ── 세이브(브라우저 localStorage): 클리어 횟수·최고 라운드 ──
+  const SAVE_KEY = 'elemancy.save';
+  let currentDiff = 'normal';
+  function loadSave() {
+    try { return JSON.parse(localStorage.getItem(SAVE_KEY)) || {}; } catch (e) { return {}; }
+  }
+  function saveSave(s) { try { localStorage.setItem(SAVE_KEY, JSON.stringify(s)); } catch (e) {} }
+  function recordResult() {
+    const s = loadSave();
+    s.clears = s.clears || { total: 0, easy: 0, normal: 0, hard: 0 };
+    s.bestWave = Math.max(s.bestWave || 0, game.wave);
+    if (game.victory) { s.clears.total += 1; s.clears[currentDiff] = (s.clears[currentDiff] || 0) + 1; }
+    saveSave(s);
+    return s;
+  }
+  function refreshStartStats() {
+    const s = loadSave();
+    const c = s.clears || { total: 0, easy: 0, normal: 0, hard: 0 };
+    const el = document.getElementById('startStats');
+    if (!c.total && !s.bestWave) { el.textContent = ''; return; }
+    el.innerHTML = `🏆 클리어 <b>${c.total}</b>회 (쉬움 ${c.easy || 0} · 보통 ${c.normal || 0} · 어려움 ${c.hard || 0})` +
+      (s.bestWave ? `<br>🌊 최고 라운드 ${s.bestWave}` : '');
+  }
+
   // 난이도 버튼 생성
   const diffBtns = document.getElementById('difficultyBtns');
   for (const [key, d] of Object.entries(CONFIG.DIFFICULTY)) {
@@ -330,6 +354,7 @@ async function boot() {
 
   function startGame(diffKey) {
     const d = CONFIG.DIFFICULTY[diffKey];
+    currentDiff = diffKey;
     game = new Game({ alchemy, waveSystem, slots, startGold: d.gold, armorMult: d.armor });
     game.path = [{ x: 1, y: 1 }, { x: 9, y: 1 }, { x: 9, y: 9 }, { x: 1, y: 9 }];
     window.game = game;
@@ -341,7 +366,8 @@ async function boot() {
   }
 
   document.getElementById('startBtn').onclick = () => showOnly(difficultyScreen);
-  document.getElementById('restartBtn').onclick = () => { game = null; window.game = null; showOnly(startScreen); };
+  document.getElementById('restartBtn').onclick = () => { game = null; window.game = null; refreshStartStats(); showOnly(startScreen); };
+  refreshStartStats(); // 첫 시작 화면에 누적 기록 표시
 
   // ── 속도 배속 ──
   const speedBtns = [...document.querySelectorAll('#speedCtl .spd')];
@@ -366,10 +392,12 @@ async function boot() {
 
   function showResult() {
     resultShown = true;
+    const s = recordResult(); // 세이브 기록(클리어 횟수·최고 라운드)
     document.getElementById('resultTitle').textContent = game.victory ? '🌌 승리!' : '💀 게임 오버';
     document.getElementById('resultBody').innerHTML =
       `도달 라운드: <b>${game.wave}</b> / ${CONFIG.MAX_WAVE}<br>` +
-      (game.victory ? '50웨이브를 모두 막아냈습니다!' : `보드가 공허로 가득 찼습니다 (${game.boardWeight()}/${CONFIG.GAME_OVER_CAP})`);
+      (game.victory ? '50웨이브를 모두 막아냈습니다!' : `보드가 공허로 가득 찼습니다 (${game.boardWeight()}/${CONFIG.GAME_OVER_CAP})`) +
+      `<br><span style="color:var(--muted)">🏆 누적 클리어 ${s.clears.total}회 · 🌊 최고 라운드 ${s.bestWave}</span>`;
     showOnly(resultScreen);
   }
 
