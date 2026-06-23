@@ -247,9 +247,10 @@ class Game {
     if (this.boardWeight() > CONFIG.GAME_OVER_CAP) this.gameOver = true;
   }
 
-  /** 수동 '다음 웨이브' 가능 여부: 라운드 시작 후 NEXT_WAVE_LOCK초 경과해야 함. */
+  /** 수동 '다음 웨이브' 가능 여부: 첫 웨이브는 즉시, 이후는 라운드 시작 후 NEXT_WAVE_LOCK초 경과해야 함. */
   canStartNextWave() {
     if (this.gameOver || this.victory || this.wave >= CONFIG.MAX_WAVE) return false;
+    if (this.wave === 0) return true; // 첫 웨이브는 바로 시작 가능
     return (CONFIG.ROUND_TIME - this.roundTimer) >= CONFIG.NEXT_WAVE_LOCK;
   }
 

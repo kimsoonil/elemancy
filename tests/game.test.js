@@ -363,6 +363,14 @@ test('퀘스트 몬스터 처치 시 난이도 수만큼 선택권', () => {
   assert.equal(g.bossTokens, 3);
 });
 
+test('다음 웨이브 버튼 — 첫 웨이브(wave 0)는 즉시 시작 가능', () => {
+  const g = newGame(seqRng([0]));
+  assert.equal(g.wave, 0);
+  assert.equal(g.canStartNextWave(), true);   // 락 없이 바로
+  assert.equal(g.manualStartWave(), true);
+  assert.equal(g.wave, 1);
+});
+
 test('다음 웨이브 버튼 — 라운드 시작 15초간 잠금', () => {
   const g = newGame(seqRng([0]));
   g.startWave();                              // roundTimer = 30

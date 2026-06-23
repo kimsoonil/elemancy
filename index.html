@@ -120,6 +120,12 @@
       background: rgba(123,140,255,0.14); border: 1px solid var(--line); }
     .speed .spd.active { background: linear-gradient(135deg, var(--accent), var(--accent2)); }
 
+    /* 웨이브 카드 컨트롤 행 (속도 · 조합식 · 다음웨이브) */
+    .wave-controls { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 6px 0 10px; }
+    .wave-controls .speed { gap: 4px; }
+    .wave-controls #recipeBtn { margin-left: auto; }
+    .next-btn { width: auto; margin: 0; padding: 8px 13px; font-size: 16px; line-height: 1; }
+
     /* 전체 화면 오버레이 (시작/난이도/결과) */
     .screen { position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center;
       background: radial-gradient(900px 600px at 50% 20%, rgba(40,30,90,0.6), transparent), rgba(4,4,12,0.94); }
@@ -287,13 +293,6 @@
       <span class="pill"><b id="topRound">0</b> 라운드</span>
       <span class="timer">⏱ <b id="topTimer">30</b>초</span>
     </div>
-    <div class="speed" id="speedCtl">
-      <button class="spd" id="pauseBtn" title="일시정지/재개 (Space)">⏸</button>
-      <button class="spd active" data-spd="1">1x</button>
-      <button class="spd" data-spd="2">2x</button>
-      <button class="spd" data-spd="4">4x</button>
-    </div>
-    <button id="recipeBtn" class="icon-btn">📜 조합식</button>
   </header>
   <div class="main">
   <div class="stage">
@@ -303,8 +302,17 @@
   <div id="panel">
     <div class="sec" id="waveCard">
       <h4>🌊 현재 웨이브</h4>
+      <div class="wave-controls">
+        <div class="speed" id="speedCtl">
+          <button class="spd" id="pauseBtn" title="일시정지/재개 (Space)">⏸</button>
+          <button class="spd active" data-spd="1">1x</button>
+          <button class="spd" data-spd="2">2x</button>
+          <button class="spd" data-spd="4">4x</button>
+        </div>
+        <button id="recipeBtn" class="icon-btn">📜 조합식</button>
+        <button id="nextWave" class="next-btn" title="다음 웨이브 시작">⏭</button>
+      </div>
       <div class="hud-row" id="waveInfo"></div>
-      <button id="nextWave">다음 웨이브 시작 ▶</button>
       <div class="log" id="log"></div>
     </div>
     <div class="hud" id="hud"></div>

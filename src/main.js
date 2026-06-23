@@ -465,13 +465,14 @@ async function boot() {
     if (!resultShown && (game.gameOver || game.victory)) showResult();
     topRound.textContent = game.wave;
     topTimer.textContent = game.wave >= CONFIG.MAX_WAVE ? '—' : Math.max(0, Math.ceil(game.roundTimer));
-    // 다음 웨이브 버튼: 라운드 시작 15초간 잠금
+    // 다음 웨이브 버튼(⏭ 아이콘): 첫 웨이브는 즉시, 이후 라운드 시작 15초간 잠금
     const canNext = game.canStartNextWave();
     nextWaveBtn.disabled = !canNext;
-    if (canNext) nextWaveBtn.textContent = '다음 웨이브 시작 ▶';
-    else {
+    if (canNext) {
+      nextWaveBtn.title = '다음 웨이브 시작';
+    } else {
       const lock = Math.max(0, Math.ceil(CONFIG.NEXT_WAVE_LOCK - (CONFIG.ROUND_TIME - game.roundTimer)));
-      nextWaveBtn.textContent = `다음 웨이브 (${lock}초 후)`;
+      nextWaveBtn.title = `다음 웨이브 (${lock}초 후)`;
     }
     waveInfo.innerHTML = renderWaveInfo(game);
     resourceInfo.innerHTML = renderResources(game);
