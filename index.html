@@ -49,10 +49,17 @@
     }
     .icon-btn:hover { background: rgba(123,140,255,0.3); }
 
-    /* 메인: 보드 + 패널 */
-    .main { flex: 1 1 auto; min-height: 0; display: flex; gap: 14px; }
+    /* 메인: 현재웨이브(우상단) + 보드(좌측) + 패널(우하단) */
+    .main {
+      flex: 1 1 auto; min-height: 0; gap: 14px;
+      display: grid;
+      grid-template-columns: 6fr 4fr;
+      grid-template-rows: auto 1fr;
+      grid-template-areas: "stage wave" "stage panel";
+    }
+    #waveCard { grid-area: wave; }
     .stage {
-      flex: 6 1 0; min-width: 0;
+      grid-area: stage; min-width: 0; min-height: 0;
       position: relative; border-radius: 18px; padding: 8px;
       background: linear-gradient(135deg, rgba(123,140,255,0.25), rgba(210,75,255,0.18));
       box-shadow: 0 0 60px rgba(90,80,200,0.25);
@@ -71,7 +78,7 @@
     .title small { display:block; font-size:9px; letter-spacing:1px; color:var(--muted); text-shadow:none; }
 
     #panel {
-      flex: 4 1 0; min-width: 0; height: 100%; overflow-y: auto;
+      grid-area: panel; min-width: 0; min-height: 0; overflow-y: auto;
       padding: 14px; border-radius: 16px;
       background: var(--panel); backdrop-filter: blur(10px);
       border: 1px solid var(--line);
@@ -249,12 +256,17 @@
       .speed .spd { padding: 8px 10px; font-size: 12px; }
       .icon-btn { padding: 8px 11px; font-size: 12px; }
 
-      /* 세로 적층 — 보드 상단 고정 + 컨트롤 하단 스크롤 */
-      .main { flex-direction: column; gap: 8px; }
-      .stage { flex: 0 0 46vh; min-height: 0; padding: 6px; border-radius: 14px; }
+      /* 세로 적층 — 현재웨이브 → 보드 → 컨트롤(스크롤) */
+      .main {
+        gap: 8px;
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 46vh 1fr;
+        grid-template-areas: "wave" "stage" "panel";
+      }
+      .stage { min-height: 0; padding: 6px; border-radius: 14px; }
       .title { display: none; }
       #panel {
-        flex: 1 1 auto; height: auto; min-height: 0;
+        height: auto; min-height: 0;
         grid-template-columns: 1fr;          /* 1열 — 좁은 화면 가독성 */
         padding: 10px; gap: 10px;
         -webkit-overflow-scrolling: touch;
@@ -299,11 +311,6 @@
     </div>
   </header>
   <div class="main">
-  <div class="stage">
-    <canvas id="game" width="640" height="640"></canvas>
-    <h1 class="title">ELEMANCY<small>우주 조합 디펜스</small></h1>
-  </div>
-  <div id="panel">
     <div class="sec" id="waveCard">
       <h4>🌊 현재 웨이브</h4>
       <div class="wave-controls">
@@ -319,6 +326,11 @@
       <div class="hud-row" id="waveInfo"></div>
       <div class="log" id="log"></div>
     </div>
+  <div class="stage">
+    <canvas id="game" width="640" height="640"></canvas>
+    <h1 class="title">ELEMANCY<small>우주 조합 디펜스</small></h1>
+  </div>
+  <div id="panel">
     <div class="hud" id="hud"></div>
     <div class="sec" id="resourceCard">
       <h4>💰 자원</h4>
