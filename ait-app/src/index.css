@@ -16,3 +16,44 @@ body,
 * {
   -webkit-tap-highlight-color: transparent;
 }
+
+/* 게임을 담는 무대 */
+.ait-stage {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #05060f;
+}
+
+.ait-phone {
+  width: 100%;
+  height: 100%;
+}
+
+.ait-phone iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* 데스크톱(넓은 화면) — 폰 크기 프레임으로 앱인토스 모바일 화면 모사 */
+@media (min-width: 821px) {
+  .ait-stage {
+    background:
+      radial-gradient(800px 500px at 50% 0%, #161a3a 0%, transparent 60%),
+      #05060f;
+  }
+  .ait-phone {
+    width: 390px;
+    height: min(844px, 94vh);
+    border-radius: 40px;
+    overflow: hidden;
+    box-shadow:
+      0 0 0 10px #14162a,
+      0 0 0 12px #2a2e4d,
+      0 30px 90px rgba(0, 0, 0, 0.65);
+  }
+}

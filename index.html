@@ -258,7 +258,11 @@
         grid-template-columns: 1fr;          /* 1열 — 좁은 화면 가독성 */
         padding: 10px; gap: 10px;
         -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;               /* 모바일 오버레이 스크롤 느낌 */
+        scrollbar-color: rgba(123,140,255,0.4) transparent;
       }
+      #panel::-webkit-scrollbar { width: 4px; }
+      #panel::-webkit-scrollbar-thumb { background: rgba(123,140,255,0.4); border-radius: 4px; }
 
       /* 터치 타깃 확대 */
       .sec { padding: 12px 13px; }
