@@ -408,19 +408,11 @@ test('sellTower — 티어×50 골드 환급 + 보드에서 제거', () => {
   assert.equal(g.sellTower('nope'), false);
 });
 
-test('7단계 — 클리어 횟수만큼 순서대로 해금', () => {
-  const mk = (n) => new Game({ alchemy: new Alchemy(recipes), waveSystem: new WaveSystem(enemies), rng: seqRng([0]), unlockedFinals: n });
-  // 해금 순서: 퀘이사 → 태양계 → 오르트구름 → 초신성 → 은하수 → 안드로메다 → 블랙홀
-  const g0 = mk(0); // 0클리어
-  assert.equal(g0.isFinalUnlocked('quasar'), false);
-  g0.bench = { wholecore: 3, sun: 1, uranus: 1 }; g0.towers = []; g0.slots = []; g0.bossTokens = 0;
-  assert.equal(g0.combine('quasar'), false); // 잠겨서 조합 불가
-  const g1 = mk(1); // 1클리어 → 첫 7단계(퀘이사)
-  assert.equal(g1.isFinalUnlocked('quasar'), true);
-  assert.equal(g1.isFinalUnlocked('solarsystem'), false);
-  const g2 = mk(2); // 2클리어 → 두 번째(태양계)까지
-  assert.equal(g2.isFinalUnlocked('solarsystem'), true);
-  assert.equal(g2.isFinalUnlocked('blackhole'), false); // 마지막(7번째)
+test('7단계 — 클리어 해금 없이 재료만 맞으면 조합 가능', () => {
+  const g = newGame(seqRng([0]));
+  g.bench = { wholecore: 3, sun: 1, uranus: 1 }; g.towers = []; g.slots = []; g.bossTokens = 0;
+  assert.equal(g.combine('quasar'), true); // 처음부터 가능(해금 불필요)
+  assert.equal(g.finalBuilt, true);        // 게임당 1회 제한은 유지
 });
 
 test('7단계 powerMult — 뒤 해금일수록 전투력 강함', () => {

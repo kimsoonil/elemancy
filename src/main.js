@@ -58,11 +58,9 @@ async function boot() {
     };
     const tabs = document.getElementById('recipeTabs');
     const body = document.getElementById('recipeBody');
-    const t7unlock = Math.min(7, (loadSave().clears && loadSave().clears.total) || 0);
-    const gridFor = (t) => (byTier[t] || []).map((u, i) => {
+    const gridFor = (t) => (byTier[t] || []).map((u) => {
       const ing = u.inputs ? u.inputs.map((id) => alchemy.name(id)).join(' + ') : '기본 원소';
-      const lock = (t === 7 && i >= t7unlock) ? ` 🔒클리어 ${i + 1}회` : '';
-      return `<div class="recipe"><div class="res">${alchemy.name(u.id)}${lock}</div><div class="ing">${ing}</div></div>`;
+      return `<div class="recipe"><div class="res">${alchemy.name(u.id)}</div><div class="ing">${ing}</div></div>`;
     }).join('');
     const show = (t) => {
       body.innerHTML = `<div class="recipe-grid">${gridFor(t)}</div>`;
@@ -289,12 +287,9 @@ async function boot() {
         const u = game.alchemy.get(id);
         const cost = costs[i]; // 부족분 = 필요한 원소 선택권
         const finalLocked = u.tier === 7 && game.finalBuilt; // 최종 1회 소진
-        const unlockLocked = u.tier === 7 && !game.isFinalUnlocked(id); // 클리어 횟수 미달
-        const can = game.bossTokens >= cost && !finalLocked && !unlockLocked;
+        const can = game.bossTokens >= cost && !finalLocked;
         const ing = u.inputs.map((x) => alchemy.name(x)).join(' + ');
-        const costTag = finalLocked ? '✅ 최종 완료'
-          : unlockLocked ? `🔒 클리어 ${game.finalIndex(id) + 1}회`
-          : cost === 0 ? '무료' : `🎟️ ${cost}`;
+        const costTag = finalLocked ? '✅ 최종 완료' : cost === 0 ? '무료' : `🎟️ ${cost}`;
         const b = document.createElement('button');
         b.className = 'mini combo';
         b.disabled = !can;
@@ -342,13 +337,9 @@ async function boot() {
     const s = loadSave();
     const c = s.clears || { total: 0, easy: 0, normal: 0, hard: 0 };
     const el = document.getElementById('startStats');
-    if (!c.total && !s.bestWave) {
-      el.innerHTML = '<span style="color:var(--muted)">클리어할수록 7단계 최종 유닛이 해금됩니다</span>';
-      return;
-    }
+    if (!c.total && !s.bestWave) { el.textContent = ''; return; }
     el.innerHTML = `🏆 클리어 <b>${c.total}</b>회 (쉬움 ${c.easy || 0} · 보통 ${c.normal || 0} · 어려움 ${c.hard || 0})` +
-      (s.bestWave ? `<br>🌊 최고 라운드 ${s.bestWave}` : '') +
-      `<br>🔓 최종 유닛 ${Math.min(7, c.total)}/7 해금`;
+      (s.bestWave ? `<br>🌊 최고 라운드 ${s.bestWave}` : '');
   }
 
   // 난이도 버튼 생성
@@ -364,8 +355,7 @@ async function boot() {
   function startGame(diffKey) {
     const d = CONFIG.DIFFICULTY[diffKey];
     currentDiff = diffKey;
-    const unlockedFinals = Math.min(7, (loadSave().clears && loadSave().clears.total) || 0);
-    game = new Game({ alchemy, waveSystem, slots, startGold: d.gold, armorMult: d.armor, unlockedFinals });
+    game = new Game({ alchemy, waveSystem, slots, startGold: d.gold, armorMult: d.armor });
     game.path = [{ x: 1, y: 1 }, { x: 9, y: 1 }, { x: 9, y: 9 }, { x: 1, y: 9 }];
     window.game = game;
     speed = 1; setSpeed(1);

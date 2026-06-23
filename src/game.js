@@ -4,14 +4,12 @@ var balance = (typeof require !== 'undefined') ? require('./balance.js') : globa
 var Combat = (typeof require !== 'undefined') ? require('./combat.js') : globalThis.combat;
 
 class Game {
-  constructor({ alchemy, waveSystem, rng = Math.random, slots = [], startGold = CONFIG.START_GOLD, armorMult = 1, unlockedFinals = Infinity }) {
+  constructor({ alchemy, waveSystem, rng = Math.random, slots = [], startGold = CONFIG.START_GOLD, armorMult = 1 }) {
     this.alchemy = alchemy;
     this.waveSystem = waveSystem;
     this.rng = rng;
     this.slots = slots;         // 자동 배치 가능한 빌드 칸 [{x,y}, ...]
     this.armorMult = armorMult; // 난이도 방어도(적 체력 배수)
-    this._finals = alchemy.byTier(7).map((u) => u.id); // 7단계 유닛(정의 순서)
-    this.unlockedFinals = unlockedFinals; // 해금된 7단계 개수(클리어 횟수)
     this.selectedUid = null;    // 클릭 선택된 타워
     this.moveMode = false;      // 이동 모드
     this.gold = startGold;
@@ -155,19 +153,11 @@ class Game {
    * resultId 합성: 보유 재료를 소모하고, 부족분은 원소 선택권으로 메워 조합.
    * 결과물은 자동 배치. 토큰 부족/최종 1회 초과면 false.
    */
-  /** 7단계 유닛의 해금 순서 인덱스(0부터). 7단계가 아니면 -1. */
-  finalIndex(id) { return this._finals.indexOf(id); }
-  /** 해당 7단계 유닛이 클리어 횟수로 해금됐는지. */
-  isFinalUnlocked(id) { const i = this.finalIndex(id); return i >= 0 && i < this.unlockedFinals; }
-
   combine(resultId) {
     const unit = this.alchemy.get(resultId);
     const need = this._recipeNeed(resultId);
     if (!need) return false;
-    if (unit.tier === 7) {
-      if (this.finalBuilt) return false;            // 최종 진화는 게임당 1회
-      if (!this.isFinalUnlocked(resultId)) return false; // 클리어 횟수로 해금 필요
-    }
+    if (unit.tier === 7 && this.finalBuilt) return false; // 최종 진화는 게임당 1회
     const missing = this.combineCost(resultId);
     if (this.bossTokens < missing) return false;            // 부족분 메울 선택권 부족
     // 보유분만 실제 소모(부족분은 토큰으로 대체)
