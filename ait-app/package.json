@@ -1,0 +1,26 @@
+{
+  "name": "elemancy-ait",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "predev": "node scripts/sync-game.mjs",
+    "dev": "granite dev",
+    "prebuild": "node scripts/sync-game.mjs",
+    "build": "ait build",
+    "deploy": "ait deploy",
+    "sync": "node scripts/sync-game.mjs"
+  },
+  "dependencies": {
+    "@apps-in-toss/web-framework": "^2.9.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "~5.7.2",
+    "vite": "^6.2.0"
+  }
+}

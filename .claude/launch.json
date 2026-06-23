@@ -6,6 +6,28 @@
       "runtimeExecutable": "node",
       "runtimeArgs": ["scripts/dev-server.js"],
       "port": 8000
+    },
+    {
+      "name": "nextholiday",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--prefix",
+        "/Users/kimsunil/Documents/GitHub/NextHoliday"
+      ],
+      "port": 5173
+    },
+    {
+      "name": "elemancy-ait",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--prefix",
+        "/Users/kimsunil/Documents/GitHub/Elemancy/ait-app"
+      ],
+      "port": 5173
     }
   ]
 }
