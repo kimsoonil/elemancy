@@ -138,7 +138,7 @@ async function boot() {
   const sheetTitle = document.getElementById('sheetTitle');
   const popGroups = [...document.querySelectorAll('.pop-group')];
   const POP_TITLE = {
-    units: '🎒 내 유닛', res: '💰 자원', draw: '🎁 뽑기',
+    units: '🎒 내 유닛', res: '💰 자원', gacha: '🎰 가챠',
     upgrade: '⬆️ 강화', gamble: '🎲 도박', quest: '🧭 퀘스트', token: '🎟️ 선택권',
   };
   function openSheet(pop) {
@@ -231,7 +231,7 @@ async function boot() {
 
   function updateEconomy() {
     // 랜덤 뽑기
-    drawBtn.innerHTML = `<span>랜덤 원소 1개</span><span class="cost">${CONFIG.RANDOM_DRAW_COST}G</span>`;
+    drawBtn.innerHTML = `<span>🎁 랜덤 원소 뽑기</span><span class="cost">${CONFIG.RANDOM_DRAW_COST}G</span>`;
     drawBtn.disabled = game.gold < CONFIG.RANDOM_DRAW_COST;
     // 업그레이드
     for (let i = 0; i < 5; i++) {
