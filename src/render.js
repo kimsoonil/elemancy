@@ -193,13 +193,15 @@ function drawGame(ctx, game) {
   ctx.globalAlpha = 1;
 }
 
-// 1번 카드: 현재 웨이브 + 다음 웨이브까지 카운트다운
+// 현재 웨이브 카드 본문: 보드 위 몬스터 수 + 다음 웨이브까지 카운트다운
 function renderWaveInfo(game) {
+  const w = game.boardWeight();
+  const danger = w > CONFIG.DANGER_THRESHOLD ? ' danger' : '';
   let label;
   if (game.victory) label = '🌌 클리어';
   else if (game.wave >= CONFIG.MAX_WAVE) label = '⚔️ 최종 웨이브';
   else label = `⏱ ${Math.max(0, Math.ceil(game.roundTimer))}초 후 다음`;
-  return `<span class="wave-badge">웨이브 ${game.wave}<span class="slash">/${CONFIG.MAX_WAVE}</span></span><span class="phase">${label}</span>`;
+  return `<span class="mon-count${danger}">👾 몬스터 <b>${w}</b><span class="slash">/${CONFIG.GAME_OVER_CAP}</span></span><span class="phase">${label}</span>`;
 }
 
 // 4번 카드: 골드 + 원소 선택권
@@ -208,13 +210,8 @@ function renderResources(game) {
     `<div class="hud-row">🎟️ <b>${game.bossTokens}</b><span class="muted">원소 선택권</span></div>`;
 }
 
-// #hud: 공허 침식 + 벤치 카드 (+ 승패 배너)
-function renderHud(game) {
-  const w = game.boardWeight();
-  const pct = Math.min(100, Math.round((w / CONFIG.GAME_OVER_CAP) * 100));
-  const barColor = w > CONFIG.DANGER_THRESHOLD ? '#ff4d4d' : w > CONFIG.GAME_OVER_CAP * 0.5 ? '#ffd23c' : '#54e08a';
-
-  // 배치된 유닛(타워)을 종류별로 집계
+// 배치된 유닛(벤치+타워) 칩 목록 — 유닛 팝업용
+function renderBench(game) {
   const placed = new Map();
   for (const t of game.towers) {
     if (!placed.has(t.unitId)) placed.set(t.unitId, { count: 0, atkType: t.atkType });
@@ -231,24 +228,11 @@ function renderHud(game) {
     const icon = e ? e.i : (TYPE_ICON[info.atkType] || '◆');
     return `<span class="chip" style="--c:${col}">${icon} ${game.alchemy.name(id)}<b>×${info.count}</b></span>`;
   }).join('') || '<span class="muted">배치된 유닛 없음</span>';
-
-  return `
-    <div class="sec">
-      <h4>🌀 공허 침식</h4>
-      <div class="cap-top"><span class="muted">보드 위 몬스터</span><b>${w} / ${CONFIG.GAME_OVER_CAP}</b></div>
-      <div class="bar"><div class="bar-fill" style="width:${pct}%;background:${barColor}"></div></div>
-    </div>
-    <div class="sec">
-      <h4>🎒 배치된 유닛</h4>
-      <div class="chips">${chips}</div>
-    </div>
-    ${game.gameOver ? '<div class="banner over">💀 게임 오버</div>' : ''}
-    ${game.victory ? '<div class="banner win">🌌 승리! 40웨이브 클리어</div>' : ''}
-  `;
+  return `<div class="chips">${chips}</div>`;
 }
 
 if (typeof window !== 'undefined') {
-  window.drawGame = drawGame; window.renderHud = renderHud;
+  window.drawGame = drawGame; window.renderBench = renderBench;
   window.renderWaveInfo = renderWaveInfo; window.renderResources = renderResources;
   window.TILE = TILE;
 }

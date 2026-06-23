@@ -17,7 +17,8 @@ async function boot() {
 
   const canvas = document.getElementById('game');
   const ctx = canvas.getContext('2d');
-  const hud = document.getElementById('hud');
+  const benchPanel = document.getElementById('benchPanel');
+  const waveCount = document.getElementById('waveCount');
   const waveInfo = document.getElementById('waveInfo');
   const resourceInfo = document.getElementById('resourceInfo');
   const selectedPanel = document.getElementById('selectedPanel');
@@ -132,6 +133,26 @@ async function boot() {
   document.getElementById('recipeClose').onclick = () => recipeModal.classList.add('hidden');
   recipeModal.onclick = (e) => { if (e.target === recipeModal) recipeModal.classList.add('hidden'); };
 
+  // ── 하단 독 → 바텀시트 팝업 ──
+  const sheetWrap = document.getElementById('sheetWrap');
+  const sheetTitle = document.getElementById('sheetTitle');
+  const popGroups = [...document.querySelectorAll('.pop-group')];
+  const POP_TITLE = {
+    units: '🎒 내 유닛', res: '💰 자원', draw: '🎁 뽑기',
+    upgrade: '⬆️ 강화', gamble: '🎲 도박', quest: '🧭 퀘스트', token: '🎟️ 선택권',
+  };
+  function openSheet(pop) {
+    popGroups.forEach((g) => g.classList.toggle('hidden', g.dataset.pop !== pop));
+    sheetTitle.textContent = POP_TITLE[pop] || '';
+    sheetWrap.classList.remove('hidden');
+  }
+  function closeSheet() { sheetWrap.classList.add('hidden'); }
+  document.querySelectorAll('#dock [data-pop]').forEach((b) => {
+    b.onclick = () => openSheet(b.dataset.pop);
+  });
+  document.getElementById('sheetClose').onclick = closeSheet;
+  sheetWrap.onclick = (e) => { if (e.target === sheetWrap) closeSheet(); };
+
   const nextWaveBtn = document.getElementById('nextWave');
   nextWaveBtn.onclick = () => game.manualStartWave();
 
@@ -158,6 +179,7 @@ async function boot() {
     }
     game.selectedUid = hit ? hit.uid : null;
     game.moveMode = false;
+    if (hit) openSheet('units'); // 타워 선택 시 유닛 팝업(이동·조합·판매)
   };
 
   const ATK_LABEL = { aoe: '광역', single: '단일', slow: '둔화', buff: '버프', stun: '스턴' };
@@ -474,9 +496,10 @@ async function boot() {
       const lock = Math.max(0, Math.ceil(CONFIG.NEXT_WAVE_LOCK - (CONFIG.ROUND_TIME - game.roundTimer)));
       nextWaveBtn.title = `다음 웨이브 (${lock}초 후)`;
     }
+    waveCount.textContent = `${game.wave}/${CONFIG.MAX_WAVE}`;
     waveInfo.innerHTML = renderWaveInfo(game);
     resourceInfo.innerHTML = renderResources(game);
-    hud.innerHTML = renderHud(game);
+    benchPanel.innerHTML = renderBench(game);
     updateEconomy();
     renderTokens();
     renderQuest();
