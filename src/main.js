@@ -35,14 +35,17 @@ async function boot() {
     logEl.className = 'log' + (kind ? ' ' + kind : '');
   }
 
-  // 캔버스를 뷰포트(가로 스테이지 폭 / 세로 높이)에 맞춰 정사각으로 스케일 → 스크롤 방지
+  // 캔버스를 스테이지 영역(가로·세로 중 작은 쪽)에 맞춰 정사각으로 스케일 → 스크롤 방지.
+  // 데스크톱(가로 분할)=폭 기준, 모바일(세로 적층, 스테이지 높이 고정)=높이 기준으로 자동 결정.
   function fitCanvas() {
     const stage = canvas.parentElement;
-    const size = Math.max(220, Math.min(stage.clientWidth - 16, window.innerHeight - 120));
+    const size = Math.max(220, Math.min(stage.clientWidth - 16, stage.clientHeight - 16));
     canvas.style.width = size + 'px';
     canvas.style.height = size + 'px';
   }
   window.addEventListener('resize', fitCanvas);
+  // 모바일 회전/툴바 변화 대응
+  window.addEventListener('orientationchange', () => setTimeout(fitCanvas, 150));
 
   // 📜 조합식 팝업
   const recipeModal = document.getElementById('recipeModal');

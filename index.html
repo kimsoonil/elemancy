@@ -222,6 +222,62 @@
     .banner { grid-column: 1 / -1; padding: 12px; border-radius: 10px; text-align: center; font-weight: 700; font-size: 16px; }
     .banner.over { background: rgba(255,60,80,0.18); color: #ff8a8a; border: 1px solid rgba(255,60,80,0.4); }
     .banner.win { background: rgba(95,240,138,0.16); color: #8bf0a8; border: 1px solid rgba(95,240,138,0.4); }
+
+    /* ───────── 모바일 최적화 (세로 / 좁은 화면) ───────── */
+    @media (max-width: 820px) {
+      body {
+        padding: 8px; gap: 8px;
+        touch-action: manipulation;
+        -webkit-user-select: none; user-select: none;
+        height: 100dvh;  /* 모바일 주소창 변동 대응 */
+      }
+
+      /* 상단 바 — 한 줄에 압축, 넘치면 줄바꿈 */
+      .topbar { gap: 8px 10px; padding: 8px 12px; flex-wrap: wrap; border-radius: 12px; }
+      .topbar .brand { font-size: 13px; letter-spacing: 1px; }
+      .topbar .brand small { display: none; }
+      .round-display { gap: 10px; font-size: 13px; }
+      .round-display .pill { padding: 4px 11px; }
+      .round-display .timer b { font-size: 16px; }
+      .speed { gap: 4px; }
+      .speed .spd { padding: 8px 10px; font-size: 12px; }
+      .icon-btn { padding: 8px 11px; font-size: 12px; }
+
+      /* 세로 적층 — 보드 상단 고정 + 컨트롤 하단 스크롤 */
+      .main { flex-direction: column; gap: 8px; }
+      .stage { flex: 0 0 46vh; min-height: 0; padding: 6px; border-radius: 14px; }
+      .title { display: none; }
+      #panel {
+        flex: 1 1 auto; height: auto; min-height: 0;
+        grid-template-columns: 1fr;          /* 1열 — 좁은 화면 가독성 */
+        padding: 10px; gap: 10px;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      /* 터치 타깃 확대 */
+      .sec { padding: 12px 13px; }
+      .sec h4 { font-size: 12px; }
+      .hud-row { font-size: 16px; }
+      button { padding: 12px 14px; font-size: 15px; }
+      .mini { padding: 12px; font-size: 13px; min-height: 44px; }
+      #combinePanel button { padding: 10px 12px; }
+      .chip { font-size: 13px; padding: 5px 11px; }
+      .combo-btn { padding: 9px 12px; font-size: 12px; }
+
+      /* 전체화면 스크린(시작/난이도/결과) */
+      .screen-card { padding: 30px 22px; width: min(92vw, 440px); }
+      .big-title { font-size: 34px; letter-spacing: 3px; }
+      .screen-card h2 { font-size: 20px; }
+      .screen-card > button { width: 100%; padding: 15px; }
+      .diff-list { flex-direction: column; gap: 10px; }
+      .diff-btn { width: 100%; padding: 16px; }
+
+      /* 조합식 모달 */
+      .modal { padding: 10px; }
+      .modal-card { padding: 16px; max-height: 92vh; }
+      .modal-card h2 { font-size: 16px; }
+      .recipe-grid { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
