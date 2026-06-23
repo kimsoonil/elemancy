@@ -59,12 +59,18 @@ async function boot() {
     const tabs = document.getElementById('recipeTabs');
     const body = document.getElementById('recipeBody');
     const gridFor = (t) => (byTier[t] || []).map((u) => {
-      const ing = u.inputs ? u.inputs.map((id) => alchemy.name(id)).join(' + ') : '기본 원소';
-      return `<div class="recipe"><div class="res">${alchemy.name(u.id)}</div><div class="ing">${ing}</div></div>`;
+      const ing = u.inputs
+        ? u.inputs.map((id) => `<span class="ing-link" data-id="${id}">${alchemy.name(id)}</span>`).join(' + ')
+        : '기본 원소';
+      return `<div class="recipe" data-id="${u.id}"><div class="res">${alchemy.name(u.id)}</div><div class="ing">${ing}</div></div>`;
     }).join('');
-    const show = (t) => {
+    const show = (t, highlightId) => {
       body.innerHTML = `<div class="recipe-grid">${gridFor(t)}</div>`;
       [...tabs.children].forEach((b) => b.classList.toggle('active', Number(b.dataset.tier) === t));
+      if (highlightId) {
+        const card = body.querySelector(`.recipe[data-id="${highlightId}"]`);
+        if (card) { card.classList.add('highlight'); card.scrollIntoView({ block: 'center' }); }
+      }
     };
     tabs.innerHTML = '';
     for (let t = 1; t <= 7; t++) {
@@ -73,6 +79,14 @@ async function boot() {
       b.onclick = () => show(t);
       tabs.appendChild(b);
     }
+    // 재료 이름 클릭 → 그 재료가 만들어지는 단계로 이동 + 강조
+    body.onclick = (e) => {
+      const link = e.target.closest('.ing-link');
+      if (!link) return;
+      const id = link.dataset.id;
+      const u = alchemy.get(id);
+      if (u) show(u.tier, id);
+    };
     show(1);
   }
   document.getElementById('recipeBtn').onclick = () => { buildRecipes(); recipeModal.classList.remove('hidden'); };
