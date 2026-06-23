@@ -105,6 +105,14 @@
     .ing-link { cursor: pointer; color: var(--accent); border-bottom: 1px dotted var(--accent); }
     .ing-link:hover { color: #fff; border-bottom-color: #fff; }
     .recipe.highlight { border-color: var(--accent2); box-shadow: 0 0 0 2px var(--accent2), 0 0 18px rgba(210,75,255,0.5); }
+    .recipe-prog { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+    .prog-bar { flex: 1 1 auto; min-width: 36px; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; }
+    .prog-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width 0.2s; }
+    .prog-pct { font-size: 11px; color: var(--muted); min-width: 30px; text-align: right; }
+    .combo-btn { flex: 0 0 auto; width: auto; margin: 0; border: 0; border-radius: 8px; padding: 5px 10px; font-size: 11px; font-weight: 700; cursor: pointer;
+      color: #fff; background: linear-gradient(135deg, var(--accent), var(--accent2)); white-space: nowrap; }
+    .combo-btn:hover:not(:disabled) { filter: brightness(1.15); }
+    .combo-btn:disabled { background: rgba(255,255,255,0.06); color: var(--muted); cursor: not-allowed; }
 
     /* 속도 배속 */
     .speed { display: flex; gap: 4px; }

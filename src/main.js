@@ -47,6 +47,8 @@ async function boot() {
   // 📜 조합식 팝업
   const recipeModal = document.getElementById('recipeModal');
   let recipesBuilt = false;
+  let recipeTier = 1;
+  let recipeShow = () => {};
   function buildRecipes() {
     if (recipesBuilt) return; recipesBuilt = true;
     const byTier = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [] };
@@ -58,13 +60,38 @@ async function boot() {
     };
     const tabs = document.getElementById('recipeTabs');
     const body = document.getElementById('recipeBody');
+    // 레시피의 보유 재료 진행도 {pct, cost, can, finalLocked} — game 없으면 null
+    const recipeProgress = (u) => {
+      if (!game || !u.inputs) return null;
+      const need = {};
+      for (const id of u.inputs) need[id] = (need[id] || 0) + 1;
+      const owned = game.ownedCounts();
+      let total = 0; let have = 0;
+      for (const [id, cnt] of Object.entries(need)) { total += cnt; have += Math.min(cnt, owned[id] || 0); }
+      const pct = total ? Math.round((have / total) * 100) : 0;
+      const cost = game.combineCost(u.id);
+      const finalLocked = u.tier === 7 && game.finalBuilt;
+      const can = !finalLocked && game.bossTokens >= cost;
+      return { pct, cost, can, finalLocked };
+    };
     const gridFor = (t) => (byTier[t] || []).map((u) => {
       const ing = u.inputs
         ? u.inputs.map((id) => `<span class="ing-link" data-id="${id}">${alchemy.name(id)}</span>`).join(' + ')
         : '기본 원소';
-      return `<div class="recipe" data-id="${u.id}"><div class="res">${alchemy.name(u.id)}</div><div class="ing">${ing}</div></div>`;
+      const p = recipeProgress(u);
+      let foot = '';
+      if (p) {
+        const costTag = p.finalLocked ? '✅ 최종 완료' : (p.cost === 0 ? '무료 조합' : `조합 🎟️${p.cost}`);
+        foot = `<div class="recipe-prog">`
+          + `<div class="prog-bar"><div class="prog-fill" style="width:${p.pct}%"></div></div>`
+          + `<span class="prog-pct">${p.pct}%</span>`
+          + `<button class="combo-btn" data-combine="${u.id}" ${p.can ? '' : 'disabled'}>${costTag}</button>`
+          + `</div>`;
+      }
+      return `<div class="recipe" data-id="${u.id}"><div class="res">${alchemy.name(u.id)}</div><div class="ing">${ing}</div>${foot}</div>`;
     }).join('');
     const show = (t, highlightId) => {
+      recipeTier = t;
       body.innerHTML = `<div class="recipe-grid">${gridFor(t)}</div>`;
       [...tabs.children].forEach((b) => b.classList.toggle('active', Number(b.dataset.tier) === t));
       if (highlightId) {
@@ -72,6 +99,7 @@ async function boot() {
         if (card) { card.classList.add('highlight'); card.scrollIntoView({ block: 'center' }); }
       }
     };
+    recipeShow = show;
     tabs.innerHTML = '';
     for (let t = 1; t <= 7; t++) {
       const b = document.createElement('button');
@@ -79,17 +107,25 @@ async function boot() {
       b.onclick = () => show(t);
       tabs.appendChild(b);
     }
-    // 재료 이름 클릭 → 그 재료가 만들어지는 단계로 이동 + 강조
     body.onclick = (e) => {
+      // 조합 버튼 → 부족분은 선택권으로 메워 합성, 현재 탭 갱신
+      const combo = e.target.closest('.combo-btn');
+      if (combo) {
+        const id = combo.dataset.combine;
+        const ok = game && game.combine(id);
+        flash(ok ? `${alchemy.name(id)} 조합 완료` : '조합 실패(선택권 부족/최종 1회 제한)', ok ? 'good' : 'bad');
+        show(recipeTier);
+        return;
+      }
+      // 재료 이름 클릭 → 그 재료가 만들어지는 단계로 이동 + 강조
       const link = e.target.closest('.ing-link');
       if (!link) return;
-      const id = link.dataset.id;
-      const u = alchemy.get(id);
-      if (u) show(u.tier, id);
+      const u = alchemy.get(link.dataset.id);
+      if (u) show(u.tier, link.dataset.id);
     };
-    show(1);
+    show(recipeTier);
   }
-  document.getElementById('recipeBtn').onclick = () => { buildRecipes(); recipeModal.classList.remove('hidden'); };
+  document.getElementById('recipeBtn').onclick = () => { buildRecipes(); recipeShow(recipeTier); recipeModal.classList.remove('hidden'); };
   document.getElementById('recipeClose').onclick = () => recipeModal.classList.add('hidden');
   recipeModal.onclick = (e) => { if (e.target === recipeModal) recipeModal.classList.add('hidden'); };
 
